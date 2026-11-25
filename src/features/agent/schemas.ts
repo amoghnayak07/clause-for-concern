@@ -41,6 +41,30 @@ export const DetectorOutputSchema = z.object({
 });
 export type DetectorOutput = z.infer<typeof DetectorOutputSchema>;
 
+/**
+ * Repair pass: only the failed quotes are re-asked. Status, confidence and
+ * verified Citations from the first pass are kept by our code.
+ */
+export const CitationRepairOutputSchema = z.object({
+  repairs: z
+    .array(
+      z.object({
+        item: z.int().describe("Number of the failed quote being replaced, as listed in the request."),
+        clauseId: z.string().describe("ID of the Clause that actually contains the text."),
+        quote: z.string().describe("Exact contiguous text copied from that Clause. No ellipses."),
+      }),
+    )
+    .describe("One entry per failed quote you can fix. Omit any you cannot support with exact text."),
+  redlineTarget: z
+    .object({
+      targetQuote: z.string().describe("Exact contiguous text in the Redline's Clause to replace."),
+      text: z.string().describe("The replacement text for that target."),
+    })
+    .nullable()
+    .describe("Only when the Redline target is listed as failed; otherwise null."),
+});
+export type CitationRepairOutput = z.infer<typeof CitationRepairOutputSchema>;
+
 export const VerifierOutputSchema = z.object({
   status: ModelStatus,
   confidence: ModelConfidence,
