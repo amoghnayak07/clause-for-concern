@@ -138,7 +138,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 2 | `docs/design-status` | Implementation status table in DESIGN.md, AGENTS.md pointer | Resolved (#5) |
 | 2 | `feat/graph` | LangGraph per-rule subgraph wiring, `mapClauses`, `assemble` + Coverage, run config | Resolved (#6) |
 | 2 | `feat/eval-cli` | Eval CLI over `data/*.txt`: label validation, per-rule recall/precision, citation pass rates, tokens, cost | Resolved (#7) |
-| 3 | `feat/review-route` | `POST /api/review` streaming (`clauses` → `finding` → `coverage` → `done`) | Open |
+| 3 | `feat/review-route` | `POST /api/review` streaming (`clauses` → `finding` → `coverage` → `done`) | Resolved (#8) |
 | 3 | `feat/viewer` | Document viewer with Citation highlights, finding cards (incl. blocked citation card, Agent's Reasoning) | Open |
 | 3 | `feat/keyboard-queue` | Review Queue ordering, J/K/A/E/X/D Decisions, inline redline edit with word diff | Open |
 | 4 | `feat/rule-status-coverage` | Rule status panel, coverage bar, clickable Unmapped Clauses | Open |
