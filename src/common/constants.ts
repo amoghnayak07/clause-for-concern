@@ -310,8 +310,17 @@ export const STREAM_EVENT = {
   FINDING: "finding",
   COVERAGE: "coverage",
   DONE: "done",
+  /** Run failed after streaming started; carries a generic message only. */
+  ERROR: "error",
 } as const;
 export type StreamEvent = ValueOf<typeof STREAM_EVENT>;
+
+export const REVIEW_API_PATH = "/api/review";
+export const NDJSON_CONTENT_TYPE = "application/x-ndjson";
+/** Longest Document `POST /api/review` accepts, in UTF-16 code units (~50 pages). */
+export const MAX_DOCUMENT_CHARS = 200_000;
+/** Shown to the client when a run fails; details are logged server-side. */
+export const REVIEW_FAILED_MESSAGE = "The review failed. Please try again.";
 
 /* ------------------------------------------------------------------------ */
 /* Review metrics                                                            */
