@@ -78,7 +78,7 @@ type Decision = { ruleId: RuleId; kind: "APPROVE" | "EDIT" | "ESCALATE" | "DISMI
 4. Parent `findings` uses an append reducer; wrapper maps subgraph output onto it.
 5. `assemble` (code): final result + Coverage (Clauses tagged by `mapClauses` or cited by any Finding ÷ total; "unavailable" if `mapClauses` failed).
 
-Run config: `maxConcurrency = MAX_CONCURRENCY` (4), `MemorySaver`, `thread_id = crypto.randomUUID()`, request `AbortSignal` passed through to graph and SDK. Route `runtime = "nodejs"`.
+Run config: `maxConcurrency = MAX_CONCURRENCY` (4), `MemorySaver`, `thread_id = crypto.randomUUID()`, request `AbortSignal` passed through to graph and SDK. Route runs on Node.js: Next 16 Cache Components (enabled) implies the Node runtime and forbids a `runtime` segment export.
 
 ### Retry layers
 | Failure | Handled by | Constant |
