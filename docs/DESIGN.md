@@ -126,5 +126,25 @@ Run config: `maxConcurrency = MAX_CONCURRENCY` (4), `MemorySaver`, `thread_id = 
 5. Minimap.
 6. Avg-seconds counter, `.docx` upload, theme polish.
 
+### Implementation status
+One branch per row, in build order. A row is **Resolved** once its PR is raised; update the row in the same PR.
+
+| Step | Branch | Scope | Status |
+|---|---|---|---|
+| 1 | `feat/scaffold-config` | Next.js scaffold, config module, constants | Resolved (#1) |
+| 1 | `feat/splitter-verifier` | Clause splitter, quote verifier + tests | Resolved (#2) |
+| 2 | `feat/model-call` | `callModel` helper, model-output and `Finding` schemas, derived action and citation state | Resolved (#3) |
+| 2 | `feat/detector-verifier` | Prompts, `detectRule` + citation repair, `verifyCitations` + Trigger Term sweep, `verifyFinding`, `emitFinding` | Resolved (#4) |
+| 2 | `feat/graph` | LangGraph per-rule subgraph wiring, `mapClauses`, `assemble` + Coverage, run config | Open |
+| 2 | `feat/eval-cli` | Eval CLI over `data/*.txt`: label validation, per-rule recall/precision, citation pass rates, tokens, cost | Open |
+| 3 | `feat/review-route` | `POST /api/review` streaming (`clauses` → `finding` → `coverage` → `done`) | Open |
+| 3 | `feat/viewer` | Document viewer with Citation highlights, finding cards (incl. blocked citation card, Agent's Reasoning) | Open |
+| 3 | `feat/keyboard-queue` | Review Queue ordering, J/K/A/E/X/D Decisions, inline redline edit with word diff | Open |
+| 4 | `feat/rule-status-coverage` | Rule status panel, coverage bar, clickable Unmapped Clauses | Open |
+| 5 | `feat/minimap` | Minimap ticks, blocked/positionless/unmapped markers | Open |
+| 6 | `feat/decision-timer` | Avg seconds per Decision | Open |
+| 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text) | Open |
+| 6 | `feat/theme-polish` | Theme polish | Open |
+
 ## README "next"
 Reviewer corrections → eval cases; precision/recall sensitivity slider; auth, database, durable per-rule steps, multi-document matters; prompt caching with cache warming; re-run single rule; one-click "check this clause" for Unmapped Clauses.
