@@ -20,6 +20,8 @@
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@langchain/core": "^1.5.1",
+    "@langchain/langgraph": "^1.7.5",
     "@mui/material": "^9.6.0",
     "@mui/material-nextjs": "^9.6.0",
     "dotenv": "^18.0.10",

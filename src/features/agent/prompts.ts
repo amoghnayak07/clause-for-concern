@@ -155,6 +155,28 @@ export function repairContent(
 }
 
 /* ------------------------------------------------------------------------ */
+/* Clause mapping (Coverage)                                                 */
+/* ------------------------------------------------------------------------ */
+
+export const MAP_CLAUSES_SYSTEM =
+  "You index NDA Clauses against a fixed playbook so a reviewer can see which Clauses were considered. " +
+  "You only tag Clauses; you do not judge compliance.";
+
+/** Asks for every Clause's relevant Rule IDs (empty when it bears on none). */
+export function mapClausesContent(document: ReviewDocument, rules: readonly PlaybookRule[]): TextBlockParam[] {
+  const playbook = rules.map((rule) => `<rule id="${rule.id}" title="${rule.title}">\n${rule.definition}\n</rule>`);
+  const instructions = [
+    "These are the playbook Rules:",
+    ...playbook,
+    "",
+    "For every Clause in the Document above, list the IDs of the Rules it bears on, in either direction (complying or violating).",
+    "Use an empty list for a Clause that bears on none of them, such as a title, a recital or a signature block.",
+    "clauses: one entry per Clause, using its id exactly as given. Do not skip Clauses.",
+  ].join("\n");
+  return [documentBlock(document), { type: "text", text: instructions }];
+}
+
+/* ------------------------------------------------------------------------ */
 /* Verifier                                                                  */
 /* ------------------------------------------------------------------------ */
 
