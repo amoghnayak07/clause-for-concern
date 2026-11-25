@@ -319,3 +319,33 @@ export type StreamEvent = ValueOf<typeof STREAM_EVENT>;
 
 /** Each decision's measured time is capped so idle time doesn't skew the average. */
 export const IDLE_CAP_SECONDS = 60;
+
+/* ------------------------------------------------------------------------ */
+/* Eval                                                                      */
+/* ------------------------------------------------------------------------ */
+
+/** Labeled Documents, relative to the working directory (see `data/README.md`). */
+export const EVAL_DATA_DIR = "data";
+export const EVAL_DOCUMENT_SUFFIX = ".txt";
+export const EVAL_LABELS_SUFFIX = ".labels.json";
+/** Anchor Quotes must be at least this long (raw characters). */
+export const MIN_ANCHOR_CHARS = 20;
+
+export interface ModelPricing {
+  /** USD per million input tokens. */
+  readonly inputPerMTok: number;
+  /** USD per million output tokens; thinking tokens bill as output. */
+  readonly outputPerMTok: number;
+}
+
+/**
+ * Standard (uncached, global) API prices by model ID, for the eval's cost
+ * column. Haiku 5.5 uses its ≤100k-token-prompt tier, which every NDA fits.
+ * Models not listed get no cost estimate.
+ */
+export const MODEL_PRICING: Readonly<Record<string, ModelPricing>> = {
+  "claude-fable-5-2": { inputPerMTok: 8, outputPerMTok: 40 },
+  "claude-opus-5-5": { inputPerMTok: 4, outputPerMTok: 20 },
+  "claude-sonnet-5-5": { inputPerMTok: 2, outputPerMTok: 10 },
+  "claude-haiku-5-5": { inputPerMTok: 0.1, outputPerMTok: 0.5 },
+};
