@@ -125,6 +125,15 @@ export const PLAYBOOK: readonly PlaybookRule[] = [
 export const CLAUSE_ID_PREFIX = "c-";
 export const CLAUSE_ID_PAD_LENGTH = 3;
 
+/**
+ * Clause label prefixes: numbered Clauses read "A3.2(a)", unnumbered
+ * blank-line paragraphs read "P1", "P2", ...
+ */
+export const CLAUSE_LABEL_PREFIX = {
+  NUMBERED: "A",
+  PARAGRAPH: "P",
+} as const;
+
 /* ------------------------------------------------------------------------ */
 /* Findings                                                                  */
 /* ------------------------------------------------------------------------ */
