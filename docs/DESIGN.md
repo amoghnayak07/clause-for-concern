@@ -74,7 +74,7 @@ type Decision = { ruleId: RuleId; kind: "APPROVE" | "EDIT" | "ESCALATE" | "DISMI
    - `detectRule`: effort high. Repair mode when `citationFeedback` in state: fresh single-turn prompt with failed quotes, reasons, real cited Clause text (+ parent intro); full doc only on `UNKNOWN_CLAUSE`. Re-asks only failed quotes; status and verified citations kept. Redline target shares the budget.
    - `verifyCitations`: code. Quote verification + Trigger Term sweep (NONE + trigger hit ⇒ RISK_FOUND, LOW, `TRIGGER_TERM`).
    - `verifyFinding`: effort medium. RISK_FOUND sees cited Clauses + parents; COMPLIANT/NOT_FOUND see the full doc and may upgrade to RISK_FOUND (new quotes verified, no retry). ERROR skips. Can lower confidence or tighten status, never relax. On failure keep detector Finding, LOW, note "verifier unavailable".
-   - Nodes never throw: they write `error` to state and route to `emit`. The wrapper also try/catches as a safety net. `APIUserAbortError` ends the run silently.
+   - Nodes never throw: they write `error` to state and route to `emit`. The wrapper also try/catches as a safety net. `APIUserAbortError` ends the run silently: the graph rejects with an `AbortError`, which callers treat as a cancelled review, not a failure.
 4. Parent `findings` uses an append reducer; wrapper maps subgraph output onto it.
 5. `assemble` (code): final result + Coverage (Clauses tagged by `mapClauses` or cited by any Finding ÷ total; "unavailable" if `mapClauses` failed).
 
@@ -136,7 +136,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 2 | `feat/model-call` | `callModel` helper, model-output and `Finding` schemas, derived action and citation state | Resolved (#3) |
 | 2 | `feat/detector-verifier` | Prompts, `detectRule` + citation repair, `verifyCitations` + Trigger Term sweep, `verifyFinding`, `emitFinding` | Resolved (#4) |
 | 2 | `docs/design-status` | Implementation status table in DESIGN.md, AGENTS.md pointer | Resolved (#5) |
-| 2 | `feat/graph` | LangGraph per-rule subgraph wiring, `mapClauses`, `assemble` + Coverage, run config | Open |
+| 2 | `feat/graph` | LangGraph per-rule subgraph wiring, `mapClauses`, `assemble` + Coverage, run config | Resolved (#6) |
 | 2 | `feat/eval-cli` | Eval CLI over `data/*.txt`: label validation, per-rule recall/precision, citation pass rates, tokens, cost | Open |
 | 3 | `feat/review-route` | `POST /api/review` streaming (`clauses` → `finding` → `coverage` → `done`) | Open |
 | 3 | `feat/viewer` | Document viewer with Citation highlights, finding cards (incl. blocked citation card, Agent's Reasoning) | Open |

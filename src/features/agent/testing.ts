@@ -2,18 +2,15 @@ import type { RuleId } from "@/common/constants";
 import { segmentDocument } from "@/features/document/segment";
 import type { Finding } from "@/features/review/finding";
 import type { ModelClient, ModelResponse } from "./callModel";
-import { detectRule } from "./detector";
-import { emitFinding } from "./emit";
+import { buildRuleReviewGraph } from "./graph";
+import { MAP_CLAUSES_SYSTEM, VERIFIER_SYSTEM } from "./prompts";
 import {
   createReviewDocument,
   initialRuleState,
   type ReviewDocument,
   type RuleReviewContext,
   type RuleReviewState,
-  type RuleReviewUpdate,
 } from "./state";
-import { verifyFinding } from "./verifier";
-import { AFTER_VERIFY_CITATIONS, routeAfterVerifyCitations, verifyCitations } from "./verifyCitations";
 
 /** Test helpers for the per-rule steps. Not used by app code. */
 
@@ -64,27 +61,47 @@ export function promptText(request: Parameters<ModelClient["create"]>): string {
   return content.map((block) => (block.type === "text" ? block.text : "")).join("\n");
 }
 
-/**
- * Runs the per-rule steps in graph order (detect → verifyCitations → repair
- * loop → verifyFinding → emit), mirroring the subgraph wiring.
- */
+/** Routes each request by pass and Rule, so concurrent calls can be answered out of order. */
+export interface RoutedRequest {
+  readonly pass: "DETECT" | "REPAIR" | "VERIFY" | "MAP_CLAUSES";
+  /** Null for MAP_CLAUSES. */
+  readonly ruleId: RuleId | null;
+}
+
+export function routedClient(answer: (request: RoutedRequest) => ModelResponse | Error) {
+  const seen: RoutedRequest[] = [];
+  const client: ModelClient = {
+    async create(params) {
+      const text = promptText([params]);
+      const ruleId = (/<rule id="([A-Z_]+)"/.exec(text)?.[1] ?? null) as RuleId | null;
+      const pass: RoutedRequest["pass"] =
+        params.system === MAP_CLAUSES_SYSTEM
+          ? "MAP_CLAUSES"
+          : params.system === VERIFIER_SYSTEM
+            ? "VERIFY"
+            : text.includes("<failed item=")
+              ? "REPAIR"
+              : "DETECT";
+      const request = { pass, ruleId: pass === "MAP_CLAUSES" ? null : ruleId };
+      seen.push(request);
+      const next = answer(request);
+      if (next instanceof Error) throw next;
+      return next;
+    },
+  };
+  return { client, seen };
+}
+
+/** Runs one Rule through the real per-rule subgraph. */
 export async function runRule(
   ruleId: RuleId,
   context: RuleReviewContext,
 ): Promise<{ finding: Finding; state: RuleReviewState }> {
-  let state = initialRuleState(ruleId);
-  const apply = (update: RuleReviewUpdate) => (state = { ...state, ...update });
-
-  apply(await detectRule(state, context));
-  for (;;) {
-    apply(verifyCitations(state, context));
-    const next = routeAfterVerifyCitations(state);
-    if (next === AFTER_VERIFY_CITATIONS.REPAIR) {
-      apply(await detectRule(state, context));
-      continue;
-    }
-    if (next === AFTER_VERIFY_CITATIONS.VERIFY_FINDING) apply(await verifyFinding(state, context));
-    break;
-  }
-  return { finding: emitFinding(state, context), state };
+  const { document } = context;
+  const output = await buildRuleReviewGraph().invoke(
+    { ...initialRuleState(ruleId), text: document.text, clauses: document.clauses, finding: null },
+    { context: { client: context.client, model: context.model }, signal: context.signal },
+  );
+  if (!output.finding) throw new Error("Subgraph emitted no Finding.");
+  return { finding: output.finding, state: output };
 }
