@@ -135,6 +135,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 1 | `feat/splitter-verifier` | Clause splitter, quote verifier + tests | Resolved (#2) |
 | 2 | `feat/model-call` | `callModel` helper, model-output and `Finding` schemas, derived action and citation state | Resolved (#3) |
 | 2 | `feat/detector-verifier` | Prompts, `detectRule` + citation repair, `verifyCitations` + Trigger Term sweep, `verifyFinding`, `emitFinding` | Resolved (#4) |
+| 2 | `docs/design-status` | Implementation status table in DESIGN.md, AGENTS.md pointer | Resolved (#5) |
 | 2 | `feat/graph` | LangGraph per-rule subgraph wiring, `mapClauses`, `assemble` + Coverage, run config | Open |
 | 2 | `feat/eval-cli` | Eval CLI over `data/*.txt`: label validation, per-rule recall/precision, citation pass rates, tokens, cost | Open |
 | 3 | `feat/review-route` | `POST /api/review` streaming (`clauses` → `finding` → `coverage` → `done`) | Open |
