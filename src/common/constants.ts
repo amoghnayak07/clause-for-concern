@@ -189,6 +189,19 @@ export const RECOMMENDED_ACTION = {
 } as const;
 export type RecommendedAction = ValueOf<typeof RECOMMENDED_ACTION>;
 
+/** Derived from a Finding, never stored. */
+export const CITATION_STATE = {
+  /** Every proposed Citation verified. */
+  VERIFIED: "VERIFIED",
+  /** Some verified, some blocked. */
+  PARTIAL: "PARTIAL",
+  /** Citation Blocked Finding: Citations were proposed and all were blocked. */
+  BLOCKED: "BLOCKED",
+  /** Nothing was cited (e.g. NOT_FOUND, PROHIBITED COMPLIANT, Possible Miss, ERROR). */
+  NONE: "NONE",
+} as const;
+export type CitationState = ValueOf<typeof CITATION_STATE>;
+
 /** Queue order: lower sorts first. */
 export const ACTION_SORT_ORDER: Readonly<Record<RecommendedAction, number>> = {
   ESCALATE: 0,
@@ -270,6 +283,7 @@ export const EFFORT = {
   VERIFIER: "medium",
   MAP_CLAUSES: "low",
 } as const;
+export type Effort = ValueOf<typeof EFFORT>;
 
 export const MAX_TOKENS = {
   DETECTOR: 16_000,
