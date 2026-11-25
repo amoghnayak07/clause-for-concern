@@ -23,6 +23,7 @@ The server validates `.env` on startup and exits with a clear message if a key i
 | `npm test` | Vitest unit tests |
 | `npm run typecheck` | `tsc --noEmit` (strict) |
 | `npm run lint` | ESLint |
+| `npm run eval [-- 02 04]` | Eval CLI over `data/*.txt` (optionally only files starting with the given prefixes): validates every label file first, then prints per-rule recall/precision, citation pass rates, tokens and cost. Calls the model; needs `.env`. Data spec: `data/README.md` |
 
 ## Layout
 
