@@ -1,10 +1,11 @@
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { describe, expect, it } from "vitest";
 import { FINDING_STATUS } from "@/common/constants";
-import { DetectorOutputSchema, MapClausesOutputSchema, VerifierOutputSchema } from "./schemas";
+import { CitationRepairOutputSchema, DetectorOutputSchema, MapClausesOutputSchema, VerifierOutputSchema } from "./schemas";
 
 const schemas = {
   detector: DetectorOutputSchema,
+  citationRepair: CitationRepairOutputSchema,
   verifier: VerifierOutputSchema,
   mapClauses: MapClausesOutputSchema,
 };
