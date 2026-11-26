@@ -455,6 +455,44 @@ export const REVIEW_UI_TEXT = {
 } as const;
 
 /* ------------------------------------------------------------------------ */
+/* Upload                                                                    */
+/* ------------------------------------------------------------------------ */
+
+/** File types the input accepts; text is extracted in the browser and lands in the input. */
+export const UPLOAD_KIND = {
+  DOCX: "DOCX",
+  TXT: "TXT",
+} as const;
+export type UploadKind = ValueOf<typeof UPLOAD_KIND>;
+
+/** Lower-case file extension → kind. `.doc` and PDF are deliberately absent. */
+export const UPLOAD_EXTENSIONS: Readonly<Record<string, UploadKind>> = {
+  ".docx": UPLOAD_KIND.DOCX,
+  ".txt": UPLOAD_KIND.TXT,
+};
+
+/** `accept` attribute for the file picker (extensions plus MIME types). */
+export const UPLOAD_ACCEPT = [
+  ".docx",
+  ".txt",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+].join(",");
+
+/** Largest file read at all, before extraction. Text length is then capped by `MAX_DOCUMENT_CHARS`. */
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+/** Copy for the file upload control. */
+export const UPLOAD_UI_TEXT = {
+  BUTTON: "Upload .docx or .txt",
+  READING: "Reading file…",
+  UNSUPPORTED: "Only .docx and .txt files are supported.",
+  TOO_LARGE: `The file is larger than ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB.`,
+  EMPTY: "No text was found in the file.",
+  FAILED: "The file couldn't be read. Check that it is a valid .docx or .txt file.",
+} as const;
+
+/* ------------------------------------------------------------------------ */
 /* Review metrics                                                            */
 /* ------------------------------------------------------------------------ */
 

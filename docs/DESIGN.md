@@ -145,7 +145,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 4 | `feat/rule-status-coverage` | Rule status panel, coverage bar, clickable Unmapped Clauses | Resolved (#12) |
 | 5 | `feat/minimap` | Minimap ticks, blocked/positionless/unmapped markers (shipped on `feat/rule-status-coverage`) | Resolved (#12) |
 | 6 | `feat/decision-timer` | Avg seconds per Decision | Resolved (#13) |
-| 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text) | Open |
+| 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text, extracted in the browser into the input), plus `.txt` | Resolved (#14) |
 | 6 | `feat/theme-polish` | Theme polish | Open |
 
 ## README "next"
