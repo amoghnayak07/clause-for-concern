@@ -240,7 +240,48 @@ export const STATUS_COLORS: Readonly<Record<FindingStatus, string>> = {
 
 export const UNMAPPED_CLAUSE_COLOR = "#9E9E9E";
 export const CITATION_HIGHLIGHT_ALPHA = 0.18;
+/** Highlight strength for the focused Finding's Citations. */
+export const FOCUSED_CITATION_HIGHLIGHT_ALPHA = 0.4;
 export const DECIDED_TICK_OPACITY = 0.35;
+
+/* ------------------------------------------------------------------------ */
+/* Viewer                                                                    */
+/* ------------------------------------------------------------------------ */
+
+/** DOM id prefixes so other features (queue, minimap, coverage) can scroll to elements. */
+export const CLAUSE_DOM_ID_PREFIX = "clause-";
+export const FINDING_DOM_ID_PREFIX = "finding-";
+
+export const STATUS_LABELS: Readonly<Record<FindingStatus, string>> = {
+  RISK_FOUND: "Risk found",
+  COMPLIANT: "Compliant",
+  NOT_FOUND: "Not found",
+  ERROR: "Error",
+};
+
+export const ACTION_LABELS: Readonly<Record<RecommendedAction, string>> = {
+  ESCALATE: "Escalate",
+  FIX: "Fix",
+  NONE: "No action",
+};
+
+export const CONFIDENCE_LABELS: Readonly<Record<Confidence, string>> = {
+  HIGH: "High confidence",
+  LOW: "Low confidence",
+};
+
+export const POSSIBLE_MISS_LABEL = "Possible Miss";
+
+export const BLOCKED_REASON_LABELS: Readonly<Record<BlockedReason, string>> = {
+  UNKNOWN_CLAUSE: "The cited clause does not exist in the document.",
+  NOT_IN_CLAUSE: "The quote was not found in the cited clause.",
+  FOUND_IN_OTHER_CLAUSE: "The quote appears in a different clause.",
+  TOO_SHORT: "The quote was too short to verify.",
+};
+
+/** UI copy for model free text (GLOSSARY "Agent's Reasoning"). */
+export const AGENT_REASONING_LABEL = "Agent's Reasoning";
+export const VERIFIER_NOTE_LABEL = "Verifier note";
 
 /* ------------------------------------------------------------------------ */
 /* Keyboard triage                                                           */
