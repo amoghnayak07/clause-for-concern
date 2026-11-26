@@ -45,13 +45,13 @@ describe("sample document", () => {
   it("segments into the Clause IDs these tests rely on", () => {
     expect(document.clauses.map((c) => `${c.id}:${c.label}`)).toEqual([
       "c-001:P1",
-      "c-002:A1",
-      "c-003:A2",
-      "c-004:A2(a)",
-      "c-005:A2(b)",
-      "c-006:A3",
-      "c-007:A4",
-      "c-008:A5",
+      "c-002:§1",
+      "c-003:§2",
+      "c-004:§2(a)",
+      "c-005:§2(b)",
+      "c-006:§3",
+      "c-007:§4",
+      "c-008:§5",
     ]);
   });
 });
@@ -83,7 +83,7 @@ describe("per-rule review", () => {
     await runRule(RULE_ID.GOVERNING_LAW, context(client));
     const content = requests[0][0].messages[0].content;
     expect(Array.isArray(content) && content[0].type === "text" && content[0].text).toMatch(/^<document>\n<clause id="c-001" label="P1">/);
-    expect(promptText(requests[0])).toContain('<clause id="c-004" label="A2(a)" parent="c-003">');
+    expect(promptText(requests[0])).toContain('<clause id="c-004" label="§2(a)" parent="c-003">');
     expect(promptText(requests[0])).toContain('<rule id="GOVERNING_LAW"');
   });
 
@@ -188,13 +188,13 @@ describe("per-rule review", () => {
   it("raises a Possible Miss when the model finds nothing but a Trigger Term occurs", async () => {
     const { client, requests } = fakeClient([
       reply({ status: "COMPLIANT", confidence: "HIGH", citations: [], redline: null, explanation: "No non-solicit." }),
-      reply(verdict("COMPLIANT", { note: "A5 restricts soliciting employees." })),
+      reply(verdict("COMPLIANT", { note: "§5 restricts soliciting employees." })),
     ]);
     const { finding } = await runRule(RULE_ID.NO_NON_SOLICIT, context(client));
 
     expect(finding).toMatchObject({ status: "RISK_FOUND", confidence: "LOW", source: "TRIGGER_TERM", citations: [] });
-    expect(finding.explanation).toContain('A5 ("solicit")');
-    expect(finding.verifierNote).toBe("A5 restricts soliciting employees.");
+    expect(finding.explanation).toContain('§5 ("solicit")');
+    expect(finding.verifierNote).toBe("§5 restricts soliciting employees.");
     expect(recommendedAction(finding)).toBe("ESCALATE");
     const verifierPrompt = promptText(requests[1]);
     expect(verifierPrompt).toContain("<excerpt>");

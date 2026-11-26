@@ -80,7 +80,7 @@ export const DEMO_FINDINGS: readonly Finding[] = [
     blockedCitations: [],
     redline: null,
     explanation:
-      "Both parties disclose and receive, and the confidentiality obligation in A3 binds each party equally.",
+      "Both parties disclose and receive, and the confidentiality obligation in §3 binds each party equally.",
     verifierNote: null,
     error: null,
     attempts: 1,
@@ -128,7 +128,7 @@ export const DEMO_FINDINGS: readonly Finding[] = [
     blockedCitations: [{ clauseId: null, reason: BLOCKED_REASON.UNKNOWN_CLAUSE }],
     redline: null,
     explanation:
-      "A4 restricts soliciting the other party's employees for twelve months, which the playbook prohibits.",
+      "§4 restricts soliciting the other party's employees for twelve months, which the playbook prohibits.",
     verifierNote:
       "Lowered confidence: the restriction is limited to employees met under the agreement; a reviewer should decide whether to strike it.",
     error: null,

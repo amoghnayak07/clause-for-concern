@@ -8,6 +8,9 @@
 
 type ValueOf<T> = T[keyof T];
 
+/** Product name: page title and the workspace heading. */
+export const APP_NAME = "Clause for Concern";
+
 /* ------------------------------------------------------------------------ */
 /* Playbook                                                                  */
 /* ------------------------------------------------------------------------ */
@@ -126,11 +129,11 @@ export const CLAUSE_ID_PREFIX = "c-";
 export const CLAUSE_ID_PAD_LENGTH = 3;
 
 /**
- * Clause label prefixes: numbered Clauses read "A3.2(a)", unnumbered
+ * Clause label prefixes: numbered Clauses read "§3.2(a)", unnumbered
  * blank-line paragraphs read "P1", "P2", ...
  */
 export const CLAUSE_LABEL_PREFIX = {
-  NUMBERED: "A",
+  NUMBERED: "§",
   PARAGRAPH: "P",
 } as const;
 
