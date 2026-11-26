@@ -333,6 +333,31 @@ export const QUEUE_UI_TEXT = {
   ALL_DECIDED: "All findings decided",
 } as const;
 
+/** Copy for the Rule status panel and coverage bar. */
+export const OVERVIEW_UI_TEXT = {
+  RULES_HEADING: "Rules",
+  RULE_PENDING: "Checking…",
+  COVERAGE_HEADING: "Coverage",
+  COVERAGE_PENDING: "Mapping clauses…",
+  COVERAGE_UNAVAILABLE: "Coverage unavailable: clause mapping failed.",
+  UNMAPPED_HEADING: "Unmapped clauses (not checked against any rule)",
+} as const;
+
+/** Minimap strip beside the Document (DESIGN "UI"). */
+export const MINIMAP = {
+  WIDTH_PX: 14,
+  TICK_HEIGHT_PX: 4,
+  /** Gap between the pinned cluster and the Document track. */
+  PINNED_GAP_PX: 6,
+} as const;
+
+export const MINIMAP_UI_TEXT = {
+  LABEL: "Minimap",
+  NOT_IN_DOCUMENT: "Not in document",
+  UNMAPPED: "Unmapped clause",
+  BLOCKED: "blocked citation",
+} as const;
+
 /* ------------------------------------------------------------------------ */
 /* Citation verification                                                     */
 /* ------------------------------------------------------------------------ */

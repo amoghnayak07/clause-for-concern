@@ -142,8 +142,8 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 3 | `feat/viewer` | Document viewer with Citation highlights, finding cards (incl. blocked citation card, Agent's Reasoning) | Resolved (#9) |
 | 3 | `fix/clause-labels-title` | Live review: paste input wired to the `/api/review` stream (cancel, retry, progress); `§` Clause labels; page title | Resolved (#10) |
 | 3 | `feat/keyboard-queue` | Review Queue ordering, J/K/A/E/X/D Decisions, inline redline edit with word diff | Resolved (#11) |
-| 4 | `feat/rule-status-coverage` | Rule status panel, coverage bar, clickable Unmapped Clauses | Open |
-| 5 | `feat/minimap` | Minimap ticks, blocked/positionless/unmapped markers | Open |
+| 4 | `feat/rule-status-coverage` | Rule status panel, coverage bar, clickable Unmapped Clauses | Resolved (#12) |
+| 5 | `feat/minimap` | Minimap ticks, blocked/positionless/unmapped markers (shipped on `feat/rule-status-coverage`) | Resolved (#12) |
 | 6 | `feat/decision-timer` | Avg seconds per Decision | Open |
 | 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text) | Open |
 | 6 | `feat/theme-polish` | Theme polish | Open |

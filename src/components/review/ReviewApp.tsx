@@ -51,7 +51,13 @@ export function ReviewApp() {
         {session.error && <Alert severity="error">{session.error}</Alert>}
       </Stack>
       <Box sx={{ flex: 1, minHeight: 0 }}>
-        <ReviewWorkspace text={session.text} clauses={session.clauses} findings={session.findings} />
+        <ReviewWorkspace
+          text={session.text}
+          clauses={session.clauses}
+          findings={session.findings}
+          coverage={session.coverage}
+          phase={session.phase}
+        />
       </Box>
     </Box>
   );
