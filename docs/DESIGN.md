@@ -146,7 +146,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 5 | `feat/minimap` | Minimap ticks, blocked/positionless/unmapped markers (shipped on `feat/rule-status-coverage`) | Resolved (#12) |
 | 6 | `feat/decision-timer` | Avg seconds per Decision | Resolved (#13) |
 | 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text, extracted in the browser into the input), plus `.txt` | Resolved (#14) |
-| 6 | `feat/theme-polish` | Theme polish | Open |
+| 6 | `feat/theme-polish` | Theme polish: WCAG AA contrast for theme colours, brand colours in constants | Resolved (#15) |
 
 ## README "next"
 Reviewer corrections → eval cases; precision/recall sensitivity slider; auth, database, durable per-rule steps, multi-document matters; prompt caching with cache warming; re-run single rule; one-click "check this clause" for Unmapped Clauses.
