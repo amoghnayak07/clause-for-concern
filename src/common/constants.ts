@@ -305,8 +305,8 @@ export const VERIFIER_NOTE_LABEL = "Verifier note";
 /* ------------------------------------------------------------------------ */
 
 export const KEYBOARD_SHORTCUTS = {
-  NEXT: "j",
-  PREVIOUS: "k",
+  NEXT: "k",
+  PREVIOUS: "j",
   APPROVE: "a",
   EDIT: "e",
   ESCALATE: "x",
@@ -345,6 +345,31 @@ export const QUEUE_UI_TEXT = {
   SAVE: "Save",
   CANCEL: "Cancel",
   ALL_DECIDED: "All findings decided",
+} as const;
+
+/** Export (DESIGN "Export"): Revised Document and Review Summary downloads. */
+export const EXPORT_FILES = {
+  REVISED: { NAME: "nda-revised.txt", TYPE: "text/plain;charset=utf-8" },
+  SUMMARY: { NAME: "nda-review-summary.md", TYPE: "text/markdown;charset=utf-8" },
+} as const;
+
+export const EXPORT_TEXT = {
+  /** Separates an inserted Clause from its neighbour in the Revised Document. */
+  PARAGRAPH_BREAK: "\n\n",
+  DOWNLOAD_REVISED: "Download revised NDA",
+  DOWNLOAD_SUMMARY: "Download review summary",
+  /** Shown beside the buttons while some Findings are undecided. */
+  UNDECIDED_WARNING: "Undecided findings are exported unchanged.",
+  SUMMARY_HEADING: "NDA review summary",
+  ESCALATIONS_HEADING: "Escalations",
+  NO_ESCALATIONS: "None.",
+  FINDINGS_HEADING: "Findings",
+  UNDECIDED: "Undecided",
+  APPLIED: "applied",
+  APPLIED_EDITED: "applied as edited",
+  NOT_APPLIED: "not applied",
+  SKIPPED_OVERLAP: "not applied: overlaps the accepted redline for",
+  SKIPPED_UNKNOWN_CLAUSE: "not applied: the target clause is not in the document",
 } as const;
 
 /** Copy for the Rule status panel and coverage bar. */

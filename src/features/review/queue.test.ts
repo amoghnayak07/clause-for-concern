@@ -69,8 +69,8 @@ describe("findingPosition", () => {
 
 describe("shortcutFor", () => {
   it("maps keys case-insensitively and ignores chords", () => {
-    expect(shortcutFor({ key: "j" })).toBe("NEXT");
-    expect(shortcutFor({ key: "K" })).toBe("PREVIOUS");
+    expect(shortcutFor({ key: "k" })).toBe("NEXT");
+    expect(shortcutFor({ key: "J" })).toBe("PREVIOUS");
     expect(shortcutFor({ key: "a" })).toBe("APPROVE");
     expect(shortcutFor({ key: "e" })).toBe("EDIT");
     expect(shortcutFor({ key: "x" })).toBe("ESCALATE");
