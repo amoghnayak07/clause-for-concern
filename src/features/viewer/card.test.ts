@@ -5,6 +5,7 @@ import {
   blockedCitationHeadline,
   blockedCitationViews,
   citedClauseLabels,
+  redlineDiff,
   redlineHeadline,
   redlineView,
   ruleTitle,
@@ -86,5 +87,35 @@ describe("redlineView", () => {
     expect(redlineHeadline(after)).toBe(`Insert after ${c2.label}`);
     const atStart = redlineView({ redline: { kind: REDLINE_KIND.INSERT, afterClauseId: null, text: "0. New." } }, CLAUSES, TEXT)!;
     expect(redlineHeadline(atStart)).toBe("Insert at the start of the document");
+  });
+});
+
+describe("redlineDiff", () => {
+  const replace = { kind: REDLINE_KIND.REPLACE, clauseId: c1.id, ...at("five (5) years"), replacement: "two (2) years" };
+
+  it("diffs the whole Clause with the draft spliced into the verified span", () => {
+    const parts = redlineDiff({ redline: replace }, CLAUSES, TEXT, "two (2) years");
+    // Words and punctuation are separate tokens, so "(" and ")" stay unchanged.
+    expect(parts?.filter((p) => p.kind === "removed").map((p) => p.text)).toEqual(["five", "5"]);
+    expect(parts?.filter((p) => p.kind === "added").map((p) => p.text)).toEqual(["two", "2"]);
+    const after = parts?.filter((p) => p.kind !== "removed").map((p) => p.text).join("");
+    expect(after).toBe(TEXT.slice(c1.start, c1.end).replace("five (5) years", "two (2) years"));
+  });
+
+  it("shows no change when the draft equals the span", () => {
+    const parts = redlineDiff({ redline: replace }, CLAUSES, TEXT, "five (5) years");
+    expect(parts?.every((p) => p.kind === "equal")).toBe(true);
+  });
+
+  it("treats an INSERT as all-new text", () => {
+    const insert = { kind: REDLINE_KIND.INSERT, afterClauseId: c2.id, text: "3. Law." };
+    expect(redlineDiff({ redline: insert }, CLAUSES, TEXT, "3. Governing law.")).toEqual([
+      { kind: "added", text: "3. Governing law." },
+    ]);
+    expect(redlineDiff({ redline: insert }, CLAUSES, TEXT, "")).toEqual([]);
+  });
+
+  it("is null without a Redline", () => {
+    expect(redlineDiff({ redline: null }, CLAUSES, TEXT, "x")).toBeNull();
   });
 });
