@@ -461,6 +461,9 @@ export const REVIEW_UI_TEXT = {
 /** Each decision's measured time is capped so idle time doesn't skew the average. */
 export const IDLE_CAP_SECONDS = 60;
 
+/** Tooltip on the avg-seconds counter explaining what is measured. */
+export const DECISION_PACE_HELP = `Focus to decision, editing included; each capped at ${IDLE_CAP_SECONDS} s; latest decision per finding.`;
+
 /* ------------------------------------------------------------------------ */
 /* Eval                                                                      */
 /* ------------------------------------------------------------------------ */
