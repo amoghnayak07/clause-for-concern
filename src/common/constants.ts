@@ -305,8 +305,8 @@ export const VERIFIER_NOTE_LABEL = "Verifier note";
 /* ------------------------------------------------------------------------ */
 
 export const KEYBOARD_SHORTCUTS = {
-  NEXT: "j",
-  PREVIOUS: "k",
+  NEXT: "k",
+  PREVIOUS: "j",
   APPROVE: "a",
   EDIT: "e",
   ESCALATE: "x",
@@ -345,6 +345,33 @@ export const QUEUE_UI_TEXT = {
   SAVE: "Save",
   CANCEL: "Cancel",
   ALL_DECIDED: "All findings decided",
+} as const;
+
+/** Export (DESIGN "Export"): Revised Document and Review Summary downloads. */
+export const EXPORT_FILES = {
+  REVISED: { NAME: "nda-revised.txt", TYPE: "text/plain;charset=utf-8" },
+  SUMMARY: { NAME: "nda-review-summary.md", TYPE: "text/markdown;charset=utf-8" },
+} as const;
+
+export const EXPORT_TEXT = {
+  /** Separates an inserted Clause from its neighbour in the Revised Document. */
+  PARAGRAPH_BREAK: "\n\n",
+  /** Tooltip prefix on accepted text shown in the viewer. */
+  TRACKED_CHANGE: "Accepted redline",
+  DOWNLOAD_REVISED: "Download revised NDA",
+  DOWNLOAD_SUMMARY: "Download review summary",
+  /** Shown beside the buttons while some Findings are undecided. */
+  UNDECIDED_WARNING: "Undecided findings are exported unchanged.",
+  SUMMARY_HEADING: "NDA review summary",
+  ESCALATIONS_HEADING: "Escalations",
+  NO_ESCALATIONS: "None.",
+  FINDINGS_HEADING: "Findings",
+  UNDECIDED: "Undecided",
+  APPLIED: "applied",
+  APPLIED_EDITED: "applied as edited",
+  NOT_APPLIED: "not applied",
+  SKIPPED_OVERLAP: "not applied: overlaps the accepted redline for",
+  SKIPPED_UNKNOWN_CLAUSE: "not applied: the target clause is not in the document",
 } as const;
 
 /** Copy for the Rule status panel and coverage bar. */
@@ -452,6 +479,80 @@ export type ReviewPhase = ValueOf<typeof REVIEW_PHASE>;
  * identically or hydration fails (e.g. en-IN renders 200000 as "2,00,000").
  */
 export const UI_NUMBER_LOCALE = "en-US";
+
+/**
+ * "Doesn't look like an NDA" warning before a review (a warning, never a block:
+ * real NDAs can be short or unnumbered). Words almost every NDA uses; matched
+ * as lower-case substrings, so "disclos" catches "disclose" and "disclosure".
+ */
+export const NDA_SIGNAL_TERMS = [
+  "confidential",
+  "disclos",
+  "recipient",
+  "proprietary",
+  "trade secret",
+] as const;
+/** Fewer characters than this always warns; a one-line NDA clause is still worth a look. */
+export const NDA_MIN_CHARS = 200;
+
+export const NDA_CHECK_TEXT = {
+  TITLE: "This doesn't look like an NDA",
+  SHORT: "It is very short.",
+  NO_STRUCTURE: "It has no numbered clauses and none of the usual NDA terms (confidential, disclosure, recipient…).",
+  ADVICE: "The review will still run, but every required rule will come back as not found and the suggested redlines won't make sense.",
+  REVIEW_ANYWAY: "Review anyway",
+} as const;
+
+/**
+ * Prompt-injection check (DESIGN "Input check"): deterministic patterns run in
+ * the browser before submit and again in `POST /api/review`. A match stops the
+ * review before any model call. Patterns are deliberately narrow, phrasing an
+ * NDA would not use, because a match blocks rather than warns. Matched
+ * case-insensitively; `m` lets `^` anchor chat-turn markers to a line start.
+ */
+export const INJECTION_PATTERNS: readonly { readonly id: string; readonly label: string; readonly source: string }[] = [
+  {
+    id: "OVERRIDE_INSTRUCTIONS",
+    label: "Asks to ignore or override instructions",
+    source:
+      String.raw`\b(?:ignore|disregard|forget|override|bypass)\s+(?:(?:all|any|every|the|your|my|of|previous|prior|above|earlier|preceding|system|developer)\s+)*?` +
+      String.raw`(?:all|any|your|previous|prior|above|earlier|preceding|system|developer)\s+(?:instructions?|prompts?|rules|guidelines|directives|messages?)\b`,
+  },
+  {
+    id: "SYSTEM_PROMPT",
+    label: "Refers to the AI's system prompt",
+    source: String.raw`\bsystem\s+(?:prompts?|messages?)\b`,
+  },
+  {
+    id: "SECRET_REQUEST",
+    label: "Asks for keys or secrets",
+    source:
+      String.raw`\b(?:give|show|reveal|print|tell|send|share|output|display|leak|dump|return)\b[^.\n]{0,40}?` +
+      String.raw`(?:\bapi[\s_-]?keys?\b|\bsecret\s+keys?\b|\baccess\s+tokens?\b|\benvironment\s+variables?\b|\.env\b)`,
+  },
+  {
+    id: "ROLE_HIJACK",
+    label: "Tries to change the AI's role",
+    source: String.raw`\byou\s+are\s+now\b|\bpretend\s+(?:to\s+be|you\s+are)\b|\bfrom\s+now\s+on,?\s+you\b|\bnew\s+instructions\s*:|\bjailbreak\b|\bdeveloper\s+mode\b`,
+  },
+  {
+    id: "CHAT_MARKUP",
+    label: "Contains chat-turn or prompt markup",
+    source: String.raw`^\s*(?:system|assistant|user|human)\s*:|<\/?(?:system|instructions?|document|excerpt|clause|rule|finding)\b[^>]*>`,
+  },
+];
+
+/** Characters of context shown either side of a matched passage. */
+export const INJECTION_CONTEXT_CHARS = 30;
+
+export const INJECTION_TEXT = {
+  TITLE: "Review stopped: possible prompt injection",
+  BODY: "This text contains instructions aimed at the AI rather than contract terms, so the review was not started and nothing was sent to the model.",
+  ACTION: "Remove or rewrite the passages below to continue.",
+  /** Returned by `POST /api/review`; the browser shows the passages itself. */
+  SERVER_MESSAGE:
+    "Review stopped: the text contains instructions aimed at the AI (possible prompt injection). Remove them and try again.",
+} as const;
 
 /** Copy for the review input and run status. */
 export const REVIEW_UI_TEXT = {

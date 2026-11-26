@@ -17,10 +17,12 @@ import {
 import type { Clause, ClauseId } from "@/features/document/types";
 import type { Coverage } from "@/features/review/coverage";
 import type { Finding } from "@/features/review/finding";
+import { acceptedRedlines, planRevision } from "@/features/review/export";
 import { coverageView, ruleStatusRows } from "@/features/review/overview";
 import { averageDecisionSummary } from "@/features/review/timing";
 import { minimapModel } from "@/features/viewer/minimap";
 import { DocumentViewer, type ClauseReveal } from "./DocumentViewer";
+import { ExportBar } from "./ExportBar";
 import { FindingList } from "./FindingList";
 import { Minimap } from "./Minimap";
 import { ReviewOverview } from "./ReviewOverview";
@@ -55,6 +57,11 @@ export function ReviewWorkspace({
   const minimap = useMemo(
     () => minimapModel(findings, clauses, coverage, state.decisions),
     [findings, clauses, coverage, state.decisions],
+  );
+  // Accepted Redlines show in the Document as soon as they are decided.
+  const splices = useMemo(
+    () => planRevision(clauses, acceptedRedlines(ordered, state.decisions)).splices,
+    [clauses, ordered, state.decisions],
   );
   const viewerRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +99,7 @@ export function ReviewWorkspace({
             focusedRuleId={state.focusedRuleId}
             onFocusFinding={focus}
             revealedClause={revealedClause}
+            splices={splices}
           />
         </Paper>
         <Minimap
@@ -134,6 +142,15 @@ export function ReviewWorkspace({
           </Typography>
         )}
         <ShortcutHint />
+        {ordered.length > 0 && (
+          <ExportBar
+            text={text}
+            clauses={clauses}
+            findings={ordered}
+            decisions={state.decisions}
+            disabled={phase === REVIEW_PHASE.RUNNING}
+          />
+        )}
         <FindingList
           findings={ordered}
           clauses={clauses}

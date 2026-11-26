@@ -1,8 +1,9 @@
 import { APIUserAbortError } from "@anthropic-ai/sdk";
-import { NDJSON_CONTENT_TYPE, REVIEW_FAILED_MESSAGE, STREAM_EVENT } from "@/common/constants";
+import { INJECTION_TEXT, NDJSON_CONTENT_TYPE, REVIEW_FAILED_MESSAGE, STREAM_EVENT } from "@/common/constants";
 import { getConfig } from "@/config";
 import { createModelClient } from "@/features/agent/client";
 import { streamReview, type ReviewRunContext } from "@/features/agent/graph";
+import { hasInjection } from "@/features/document/injection";
 import {
   encodeReviewEvent,
   ReviewRequestSchema,
@@ -84,6 +85,10 @@ export async function POST(request: Request): Promise<Response> {
   const parsed = ReviewRequestSchema.safeParse(body);
   if (!parsed.success) {
     return errorResponse(400, parsed.error.issues.map((issue) => issue.message).join("; "));
+  }
+  // Stop before any model call. The browser runs the same check; this covers direct API calls.
+  if (hasInjection(parsed.data.text)) {
+    return errorResponse(422, INJECTION_TEXT.SERVER_MESSAGE);
   }
 
   let context: ReviewRunContext;

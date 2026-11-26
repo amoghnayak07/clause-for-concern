@@ -93,19 +93,32 @@ Run config: `maxConcurrency = MAX_CONCURRENCY` (4), `MemorySaver`, `thread_id = 
 - `DETECTOR_MAX_TOKENS` 16000, `VERIFIER_MAX_TOKENS` 8000, `MAP_MAX_TOKENS` 4000. Explanation ≤ 2 sentences (prompt) + UI clamp.
 - Document duplicated per Send payload and checkpoint (~1 MB/review in memory): accepted.
 - No `temperature` set. Effort: detector high, verifier medium, mapClauses low.
+- Every system prompt ends with `UNTRUSTED_DOCUMENT_NOTICE`: text in `<document>` / `<excerpt>` is user-supplied contract text to analyse, never instructions. Defence in depth: the API key is never in a prompt, outputs are schema-bound, and quotes are verified.
+
+### Input check
+**Prompt injection (blocks).** `detectInjection` (code, no model call) matches narrow `INJECTION_PATTERNS`: override-instructions phrasing, "system prompt", requests for keys/secrets, role hijacks, chat-turn markers and our own prompt tags. It runs in the browser on Review and again in `POST /api/review` (422, no run started). The browser shows each matched passage with context; Review stays disabled until the text changes. No override: patterns are chosen so contract language doesn't match (tested against the sample NDA, ordinary clause wording, and `data/*.txt` once present). Not caught: paraphrased or obfuscated injections; the prompt notice and schema-bound outputs remain the backstop.
+
+**Not an NDA (warns).** Before a review, `ndaWarnings` (code, no model call) warns when the text is under `NDA_MIN_CHARS` (200), or has neither a numbered Clause nor any `NDA_SIGNAL_TERMS`. Advisory: the first Review shows the warning and the button becomes "Review anyway"; editing the text re-arms it.
 
 ## Streaming
 `POST /api/review`, consumed with `fetch` + stream reader. `streamMode: "custom"` only (`updates` behind `DEBUG_STREAM`). Events: `clauses` (once, immediately) → `finding` (one per Rule, final only) → `coverage` → `done`.
 
 ## UI
 - Viewer renders original text sliced by offsets; highlights from Citations only.
+- Accepted Redlines show in the viewer as tracked changes the moment they are decided: the original span stays, struck through (its Citation highlight intact), with the new text in an `<ins>` right after it; INSERTs appear after their Clause. Same placement as the Revised Document (`planRevision`), so screen and download agree. Inserted text is marked as Redline text, never as Document text (ADR 0002).
 - Blocked citation card: "Agent cited §X but the quote didn't match" + real Clause text. Never the model quote.
 - Explanation under an "Agent's Reasoning" label, visually distinct.
 - Minimap: one tick per verified Citation at the Clause's measured position; dashed tick for blocked Citations with a real Clause ID; pinned "not in document" cluster at top for positionless Findings (click focuses the queue); grey ticks for Unmapped Clauses; decided ticks dim.
 - Rule status panel and coverage bar ("38 of 41 clauses mapped"); Unmapped Clauses clickable (scroll).
 - Queue: sort by action (ESCALATE → FIX → NONE), then document position, positionless first in group; sorted insert while streaming with focus pinned to Finding ID; auto-advance to next undecided after a Decision; J/K visit all; COMPLIANT at the bottom.
-- Keys (constants): J/K move, A approve, E edit redline inline (jsdiff word diff of the Clause), X escalate + reason, D dismiss + optional reason. On-screen hint.
+- Keys (constants): K next, J previous, A approve, E edit redline inline (jsdiff word diff of the Clause), X escalate + reason, D dismiss + optional reason. On-screen hint.
 - Avg seconds per decision: focus → Decision, each capped at `IDLE_CAP_SECONDS` (60), latest Decision per Finding counts, editing time included.
+
+## Export
+- Two downloads in the queue panel, enabled once the stream ends; undecided Findings export unchanged (with a hint).
+- **Revised Document** (`.txt`): the untouched Document text with every Accepted Redline applied. APPROVE applies the agent's Redline, EDIT the reviewer's text; ESCALATE, DISMISS and undecided apply nothing. REPLACE splices at its verified span; INSERT adds a paragraph (`\n\n`) after its Clause, or at the start when it has none. A REPLACE that overlaps an earlier one in queue order is skipped, never merged; an INSERT with an unknown Clause is skipped.
+- **Review Summary** (`.md`): decided count, escalations with reasons, then every Finding in queue order with Status, Decision, reason and Redline outcome (applied, applied as edited, not applied, skipped and why).
+- Pure (`features/review/export.ts`); the component only builds a Blob and clicks a link. Plain text out even for `.docx` input (formatting was dropped at upload).
 
 ## Eval CLI
 - Loads the same `.env` through the config module. Runs the same compiled graph over `data/*.txt` one document at a time.
@@ -147,6 +160,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 6 | `feat/decision-timer` | Avg seconds per Decision | Resolved (#13) |
 | 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text, extracted in the browser into the input), plus `.txt` | Resolved (#14) |
 | 6 | `feat/theme-polish` | Theme polish: WCAG AA contrast for theme colours, brand colours in constants | Resolved (#15) |
+| 7 | `final-updates` | Export (Revised Document + Review Summary), Accepted Redlines as tracked changes in the viewer, K next / J previous, untrusted-document prompt notice, prompt-injection block (browser + route), "doesn't look like an NDA" warning, README "What I would do next" | Open |
 
 ## README "next"
-Reviewer corrections → eval cases; precision/recall sensitivity slider; auth, database, durable per-rule steps, multi-document matters; prompt caching with cache warming; re-run single rule; one-click "check this clause" for Unmapped Clauses.
+Reviewer corrections → eval cases; precision/recall sensitivity slider; auth, database, durable per-rule steps, multi-document matters; prompt caching with cache warming; re-run single rule (re-review after Decisions); one-click "check this clause" for Unmapped Clauses.

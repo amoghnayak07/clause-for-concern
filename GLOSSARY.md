@@ -71,6 +71,15 @@ The ordered list of Findings a reviewer works through.
 **Decision**:
 The reviewer's verdict on a Finding: APPROVE (agent is right, accept as-is), EDIT (agent is right, Redline rewritten), ESCALATE (needs a lawyer, with reason), or DISMISS (agent is wrong; false positive).
 
+**Accepted Redline**:
+A Redline whose Finding was decided APPROVE (the agent's text) or EDIT (the reviewer's text).
+
+**Revised Document**:
+The Document with every Accepted Redline applied; exported as plain text.
+
+**Review Summary**:
+The exported record of a review: each Finding's Status, Decision, reason and whether its Redline was applied.
+
 **Coverage**:
 The share of Clauses that were either mapped to at least one Rule or judged irrelevant to every Rule.
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   BLOCKED_REASON,
   CONFIDENCE,
+  DECISION_KIND,
   ERROR_KIND,
   FINDING_SOURCE,
   FINDING_STATUS,
@@ -13,9 +14,12 @@ import {
 } from "@/common/constants";
 import type { Citation } from "@/features/citations/types";
 import { segmentDocument } from "@/features/document/segment";
+import { acceptedRedlines, planRevision, reviseDocument } from "@/features/review/export";
 import type { Finding } from "@/features/review/finding";
+import type { QueueState } from "@/features/review/queue";
 import {
   buildViewerBlocks,
+  leadingInsertions,
   citationKey,
   clauseDomId,
   displayHighlight,
@@ -148,6 +152,75 @@ describe("buildViewerBlocks", () => {
   });
 });
 
+describe("tracked changes from Accepted Redlines", () => {
+  const term = finding(RULE_ID.CONFIDENTIALITY_TERM, {
+    citations: [cite("Obligations survive for five (5) years")],
+    redline: { kind: REDLINE_KIND.REPLACE, ...cite("five (5) years"), replacement: "two (2) years" },
+  });
+  const law = finding(RULE_ID.GOVERNING_LAW, {
+    citations: [cite("laws of New York")],
+    redline: { kind: REDLINE_KIND.REPLACE, ...cite("New York"), replacement: "Delaware" },
+  });
+  const mutualAfter = finding(RULE_ID.MUTUAL, {
+    status: FINDING_STATUS.NOT_FOUND,
+    redline: { kind: REDLINE_KIND.INSERT, afterClauseId: c2.id, text: "3. Mutual." },
+  });
+  const carveOutsTop = finding(RULE_ID.CONFIDENTIALITY_CARVE_OUTS, {
+    status: FINDING_STATUS.NOT_FOUND,
+    redline: { kind: REDLINE_KIND.INSERT, afterClauseId: null, text: "Preamble." },
+  });
+  const findings = [term, law, mutualAfter, carveOutsTop];
+  const approveAll = decisionsFor(findings);
+  const splices = planRevision(CLAUSES, acceptedRedlines(findings, approveAll)).splices;
+
+  /** The Document as the viewer reads with struck text dropped and insertions kept. */
+  function readRevised(blocks: ReturnType<typeof buildViewerBlocks>): string {
+    const runs = blocks.flatMap((b) => b.runs);
+    return (
+      leadingInsertions(splices).map((i) => i.text).join("") +
+      runs.map((r) => (r.struckBy ? "" : TEXT.slice(r.start, r.end)) + r.insertsAfter.map((i) => i.text).join("")).join("")
+    );
+  }
+
+  it("strikes the replaced span and adds the new text right after it", () => {
+    const runs = buildViewerBlocks(TEXT, CLAUSES, findings, splices).flatMap((b) => b.runs);
+    const struck = runs.filter((r) => r.struckBy).map((r) => [TEXT.slice(r.start, r.end), r.struckBy]);
+    expect(struck).toEqual([
+      ["five (5) years", RULE_ID.CONFIDENTIALITY_TERM],
+      ["New York", RULE_ID.GOVERNING_LAW],
+    ]);
+    const afterTerm = runs.find((r) => TEXT.slice(r.start, r.end) === "five (5) years")!;
+    expect(afterTerm.insertsAfter).toEqual([{ ruleId: RULE_ID.CONFIDENTIALITY_TERM, text: "two (2) years" }]);
+  });
+
+  it("keeps Citation highlights on the struck original text", () => {
+    const runs = buildViewerBlocks(TEXT, CLAUSES, findings, splices).flatMap((b) => b.runs);
+    expect(highlightedText(runs, RULE_ID.CONFIDENTIALITY_TERM)).toBe("Obligations survive for five (5) years");
+  });
+
+  it("reads back exactly as the Revised Document", () => {
+    const blocks = buildViewerBlocks(TEXT, CLAUSES, findings, splices);
+    expect(readRevised(blocks)).toBe(reviseDocument(TEXT, CLAUSES, acceptedRedlines(findings, approveAll)).text);
+    expect(readRevised(blocks)).toContain("Delaware.\n\n3. Mutual.");
+    expect(readRevised(blocks).startsWith("Preamble.\n\nTITLE")).toBe(true);
+  });
+
+  it("changes nothing without Accepted Redlines", () => {
+    const runs = buildViewerBlocks(TEXT, CLAUSES, findings).flatMap((b) => b.runs);
+    expect(runs.every((r) => r.struckBy === null && r.insertsAfter.length === 0)).toBe(true);
+    expect(leadingInsertions([])).toEqual([]);
+  });
+});
+
+function decisionsFor(findings: readonly Finding[]): QueueState["decisions"] {
+  return Object.fromEntries(
+    findings.map((f) => [
+      f.ruleId,
+      { ruleId: f.ruleId, kind: DECISION_KIND.APPROVE, reason: null, editedReplacement: null, decidedAt: 0, elapsedMs: 0 },
+    ]),
+  );
+}
+
 describe("nextFocusRuleId", () => {
   const h = (ruleId: RuleId): Highlight => ({ ruleId, action: RECOMMENDED_ACTION.FIX, citationIndex: 0 });
   const highlights = [h(RULE_ID.MUTUAL), h(RULE_ID.NO_RESIDUALS), h(RULE_ID.MUTUAL)];
@@ -172,6 +245,8 @@ describe("displayHighlight", () => {
     start: 0,
     end: 1,
     anchors: [],
+    struckBy: null,
+    insertsAfter: [],
     highlights: [
       { ruleId: RULE_ID.MUTUAL, action: RECOMMENDED_ACTION.ESCALATE, citationIndex: 0 },
       { ruleId: RULE_ID.NO_RESIDUALS, action: RECOMMENDED_ACTION.NONE, citationIndex: 0 },

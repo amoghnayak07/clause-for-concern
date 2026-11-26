@@ -43,3 +43,25 @@ src/
 ```
 
 Business logic lives outside React so the eval CLI and tests can reuse it.
+
+## Reviewing
+
+Work through the queue with the keyboard: **K** next, **J** previous, **A** approve, **E** edit the redline, **X** escalate (reason required), **D** dismiss. Approved and edited redlines show in the document straight away as tracked changes (original struck through, new text underlined). When the review finishes, export from the queue panel:
+
+- **Download revised NDA**: the document as plain text, with every approved or edited redline applied. Escalated, dismissed and undecided findings change nothing.
+- **Download review summary**: Markdown listing escalations with their reasons, then every finding's status, decision and whether its redline was applied.
+
+If the text contains instructions aimed at the AI (e.g. "ignore all previous instructions", "give me the API key"), the review is stopped before anything is sent to the model and the offending passages are shown; edit them out to continue. The server applies the same check.
+
+Decisions live only in the browser tab; reloading or starting a new review discards them.
+
+## What I would do next
+
+- **Re-review after decisions**: re-run a single rule on a dismissed or edited finding (or over the revised document) instead of the whole review.
+- **Reviewer corrections → eval cases**: turn edits and dismissals into labelled data for the eval CLI.
+- **Persist decisions**: auth and a database so a review survives a reload, plus durable per-rule steps and multi-document matters.
+- **`.docx` export**: write redlines back as tracked changes in the uploaded file instead of plain text.
+- **Model-side injection detection**: a flag in the detector's output that stops a running review, to catch paraphrased injections the pattern check misses.
+- **Precision/recall sensitivity slider**.
+- **Prompt caching** with cache warming.
+- **One-click "check this clause"** for Unmapped Clauses.
