@@ -480,6 +480,29 @@ export type ReviewPhase = ValueOf<typeof REVIEW_PHASE>;
  */
 export const UI_NUMBER_LOCALE = "en-US";
 
+/**
+ * "Doesn't look like an NDA" warning before a review (a warning, never a block:
+ * real NDAs can be short or unnumbered). Words almost every NDA uses; matched
+ * as lower-case substrings, so "disclos" catches "disclose" and "disclosure".
+ */
+export const NDA_SIGNAL_TERMS = [
+  "confidential",
+  "disclos",
+  "recipient",
+  "proprietary",
+  "trade secret",
+] as const;
+/** Fewer characters than this always warns; a one-line NDA clause is still worth a look. */
+export const NDA_MIN_CHARS = 200;
+
+export const NDA_CHECK_TEXT = {
+  TITLE: "This doesn't look like an NDA",
+  SHORT: "It is very short.",
+  NO_STRUCTURE: "It has no numbered clauses and none of the usual NDA terms (confidential, disclosure, recipient…).",
+  ADVICE: "The review will still run, but every required rule will come back as not found and the suggested redlines won't make sense.",
+  REVIEW_ANYWAY: "Review anyway",
+} as const;
+
 /** Copy for the review input and run status. */
 export const REVIEW_UI_TEXT = {
   INPUT_LABEL: "NDA text",

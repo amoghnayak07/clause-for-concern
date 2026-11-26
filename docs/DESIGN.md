@@ -93,6 +93,10 @@ Run config: `maxConcurrency = MAX_CONCURRENCY` (4), `MemorySaver`, `thread_id = 
 - `DETECTOR_MAX_TOKENS` 16000, `VERIFIER_MAX_TOKENS` 8000, `MAP_MAX_TOKENS` 4000. Explanation ≤ 2 sentences (prompt) + UI clamp.
 - Document duplicated per Send payload and checkpoint (~1 MB/review in memory): accepted.
 - No `temperature` set. Effort: detector high, verifier medium, mapClauses low.
+- Every system prompt ends with `UNTRUSTED_DOCUMENT_NOTICE`: text in `<document>` / `<excerpt>` is user-supplied contract text to analyse, never instructions. Defence in depth: the API key is never in a prompt, outputs are schema-bound, and quotes are verified.
+
+### Input check
+Before a review, `ndaWarnings` (code, no model call) warns when the text is under `NDA_MIN_CHARS` (200), or has neither a numbered Clause nor any `NDA_SIGNAL_TERMS`. Advisory: the first Review shows the warning and the button becomes "Review anyway"; editing the text re-arms it.
 
 ## Streaming
 `POST /api/review`, consumed with `fetch` + stream reader. `streamMode: "custom"` only (`updates` behind `DEBUG_STREAM`). Events: `clauses` (once, immediately) → `finding` (one per Rule, final only) → `coverage` → `done`.
@@ -154,7 +158,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 6 | `feat/decision-timer` | Avg seconds per Decision | Resolved (#13) |
 | 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text, extracted in the browser into the input), plus `.txt` | Resolved (#14) |
 | 6 | `feat/theme-polish` | Theme polish: WCAG AA contrast for theme colours, brand colours in constants | Resolved (#15) |
-| 7 | `final-updates` | Export (Revised Document + Review Summary), K next / J previous, README "What I would do next" | Open |
+| 7 | `final-updates` | Export (Revised Document + Review Summary), Accepted Redlines as tracked changes in the viewer, K next / J previous, untrusted-document prompt notice, "doesn't look like an NDA" warning, README "What I would do next" | Open |
 
 ## README "next"
 Reviewer corrections → eval cases; precision/recall sensitivity slider; auth, database, durable per-rule steps, multi-document matters; prompt caching with cache warming; re-run single rule (re-review after Decisions); one-click "check this clause" for Unmapped Clauses.

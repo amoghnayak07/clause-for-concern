@@ -2,17 +2,20 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import {
   MAX_DOCUMENT_CHARS,
+  NDA_CHECK_TEXT,
   REVIEW_UI_TEXT,
   UI_NUMBER_LOCALE,
   UPLOAD_ACCEPT,
   UPLOAD_UI_TEXT,
 } from "@/common/constants";
+import { ndaWarnings } from "@/features/document/ndaCheck";
 import { readUploadedDocument, type DocxTextExtractor } from "@/features/document/upload";
 import { DEMO_TEXT } from "@/features/viewer/fixture";
 
@@ -42,10 +45,18 @@ export function ReviewInput({ initialText, error, onSubmit }: ReviewInputProps) 
   const [uploadError, setUploadError] = useState<string | null>(null);
   const tooLong = text.length > MAX_DOCUMENT_CHARS;
   const canSubmit = text.trim() !== "" && !tooLong && !uploading;
+  // The text the "not an NDA" warning was shown for; submitting it again goes ahead.
+  const [warnedText, setWarnedText] = useState<string | null>(null);
+  const warnings = warnedText === text ? ndaWarnings(text) : [];
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    if (canSubmit) onSubmit(text);
+    if (!canSubmit) return;
+    if (warnedText !== text && ndaWarnings(text).length > 0) {
+      setWarnedText(text);
+      return;
+    }
+    onSubmit(text);
   };
 
   const upload = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +83,12 @@ export function ReviewInput({ initialText, error, onSubmit }: ReviewInputProps) 
             {uploadError}
           </Alert>
         )}
+        {warnings.length > 0 && (
+          <Alert severity="warning">
+            <AlertTitle>{NDA_CHECK_TEXT.TITLE}</AlertTitle>
+            {warnings.map((warning) => NDA_CHECK_TEXT[warning]).join(" ")} {NDA_CHECK_TEXT.ADVICE}
+          </Alert>
+        )}
         <TextField
           label={REVIEW_UI_TEXT.INPUT_LABEL}
           placeholder={REVIEW_UI_TEXT.INPUT_PLACEHOLDER}
@@ -89,7 +106,7 @@ export function ReviewInput({ initialText, error, onSubmit }: ReviewInputProps) 
         />
         <Stack direction="row" spacing={1}>
           <Button type="submit" variant="contained" disabled={!canSubmit}>
-            {REVIEW_UI_TEXT.SUBMIT}
+            {warnings.length > 0 ? NDA_CHECK_TEXT.REVIEW_ANYWAY : REVIEW_UI_TEXT.SUBMIT}
           </Button>
           <Button component="label" variant="outlined" disabled={uploading}>
             {uploading ? UPLOAD_UI_TEXT.READING : UPLOAD_UI_TEXT.BUTTON}
