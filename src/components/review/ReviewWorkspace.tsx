@@ -6,6 +6,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useMemo, useRef, useState } from "react";
 import {
+  DECISION_PACE_HELP,
   KEYBOARD_SHORTCUTS,
   QUEUE_UI_TEXT,
   REVIEW_PHASE,
@@ -17,6 +18,7 @@ import type { Clause, ClauseId } from "@/features/document/types";
 import type { Coverage } from "@/features/review/coverage";
 import type { Finding } from "@/features/review/finding";
 import { coverageView, ruleStatusRows } from "@/features/review/overview";
+import { averageDecisionSummary } from "@/features/review/timing";
 import { minimapModel } from "@/features/viewer/minimap";
 import { DocumentViewer, type ClauseReveal } from "./DocumentViewer";
 import { FindingList } from "./FindingList";
@@ -47,6 +49,7 @@ export function ReviewWorkspace({
 }: ReviewWorkspaceProps) {
   const { ordered, state, focus, setDraft, cancel, submit } = useReviewQueue(findings, clauses);
   const decided = ordered.filter((finding) => state.decisions[finding.ruleId]).length;
+  const pace = useMemo(() => averageDecisionSummary(state.decisions), [state.decisions]);
   const rows = useMemo(() => ruleStatusRows(findings, state.decisions), [findings, state.decisions]);
   const coverageBar = useMemo(() => coverageView(coverage, clauses, phase), [coverage, clauses, phase]);
   const minimap = useMemo(
@@ -119,6 +122,17 @@ export function ReviewWorkspace({
             </Typography>
           )}
         </Stack>
+        {pace && (
+          <Typography
+            variant="caption"
+            component="p"
+            color="text.secondary"
+            title={DECISION_PACE_HELP}
+            sx={{ mb: 0.5, fontVariantNumeric: "tabular-nums" }}
+          >
+            {pace}
+          </Typography>
+        )}
         <ShortcutHint />
         <FindingList
           findings={ordered}

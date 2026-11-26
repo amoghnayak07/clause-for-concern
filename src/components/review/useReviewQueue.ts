@@ -9,16 +9,16 @@ import { INITIAL_QUEUE_STATE, orderQueue, queueReducer, shortcutFor } from "@/fe
 /**
  * Review Queue state for one review: Findings in queue order, focus pinned to
  * a Rule ID while new Findings stream in, and J/K/A/E/X/D on the window.
- * Remounting (a new review) starts afresh.
+ * Remounting (a new review) starts afresh. `now` is the clock Decision times are measured with.
  */
-export function useReviewQueue(findings: readonly Finding[], clauses: readonly Clause[]) {
+export function useReviewQueue(findings: readonly Finding[], clauses: readonly Clause[], now: () => number = Date.now) {
   const ordered = useMemo(() => orderQueue(findings, clauses), [findings, clauses]);
   const order = useMemo(() => ordered.map((finding) => finding.ruleId), [ordered]);
   const [state, dispatch] = useReducer(queueReducer, INITIAL_QUEUE_STATE);
 
   useEffect(() => {
-    dispatch({ type: "synced", order, now: Date.now() });
-  }, [order]);
+    dispatch({ type: "synced", order, now: now() });
+  }, [order, now]);
 
   const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
     if (event.defaultPrevented || isEditable(event.target)) return;
@@ -28,15 +28,15 @@ export function useReviewQueue(findings: readonly Finding[], clauses: readonly C
     }
     const shortcut = shortcutFor(event);
     if (!shortcut) return;
-    const now = Date.now();
+    const at = now();
     const focused = ordered.find((finding) => finding.ruleId === state.focusedRuleId);
     switch (shortcut) {
       case "NEXT":
       case "PREVIOUS":
-        dispatch({ type: "move", delta: shortcut === "NEXT" ? 1 : -1, order, now });
+        dispatch({ type: "move", delta: shortcut === "NEXT" ? 1 : -1, order, now: at });
         break;
       case "APPROVE":
-        dispatch({ type: "approve", order, now });
+        dispatch({ type: "approve", order, now: at });
         break;
       case "EDIT":
         if (focused) dispatch({ type: "beginEdit", finding: focused });
@@ -56,10 +56,10 @@ export function useReviewQueue(findings: readonly Finding[], clauses: readonly C
     return () => window.removeEventListener("keydown", listener);
   }, []);
 
-  const focus = useCallback((ruleId: RuleId) => dispatch({ type: "focus", ruleId, now: Date.now() }), []);
+  const focus = useCallback((ruleId: RuleId) => dispatch({ type: "focus", ruleId, now: now() }), [now]);
   const setDraft = useCallback((draft: string) => dispatch({ type: "draft", draft }), []);
   const cancel = useCallback(() => dispatch({ type: "cancel" }), []);
-  const submit = useCallback(() => dispatch({ type: "submit", order, now: Date.now() }), [order]);
+  const submit = useCallback(() => dispatch({ type: "submit", order, now: now() }), [order, now]);
 
   return { ordered, state, focus, setDraft, cancel, submit };
 }

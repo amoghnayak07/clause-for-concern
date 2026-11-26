@@ -25,7 +25,7 @@ export interface Decision {
   /** EDIT only: the reviewer's Redline text (REPLACE replacement or INSERT text). */
   readonly editedReplacement: string | null;
   readonly decidedAt: number;
-  /** Focus → Decision, uncapped; the average applies `IDLE_CAP_SECONDS`. */
+  /** Focus → Decision, uncapped; the average (`timing.ts`) applies `IDLE_CAP_SECONDS`. */
   readonly elapsedMs: number;
 }
 
