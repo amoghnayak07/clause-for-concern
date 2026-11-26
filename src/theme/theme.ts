@@ -1,6 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 import {
   ACTION_COLORS,
+  BRAND_COLORS,
   STATUS_COLORS,
   UNMAPPED_CLAUSE_COLOR,
   type FindingStatus,
@@ -28,9 +29,9 @@ export const theme = createTheme({
   cssVariables: true,
   palette: {
     mode: "light",
-    primary: { main: "#1F3A5F" },
-    secondary: { main: "#6B4E9B" },
-    background: { default: "#F6F7F9", paper: "#FFFFFF" },
+    primary: { main: BRAND_COLORS.PRIMARY },
+    secondary: { main: BRAND_COLORS.SECONDARY },
+    background: { default: BRAND_COLORS.BACKGROUND, paper: BRAND_COLORS.PAPER },
     review: {
       action: { ...ACTION_COLORS },
       status: { ...STATUS_COLORS },

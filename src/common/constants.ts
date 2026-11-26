@@ -228,9 +228,22 @@ export type DecisionKind = ValueOf<typeof DECISION_KIND>;
 /* Colours (read by the MUI theme)                                           */
 /* ------------------------------------------------------------------------ */
 
+/**
+ * App chrome. Every colour in this section must stay at or above WCAG AA on
+ * both surfaces (`theme.contrast.test.ts`). Review colours are used as text, so
+ * they need 4.5:1, not just the 3:1 allowed for non-text marks.
+ */
+export const BRAND_COLORS = {
+  PRIMARY: "#1F3A5F",
+  SECONDARY: "#6B4E9B",
+  BACKGROUND: "#F6F7F9",
+  PAPER: "#FFFFFF",
+} as const;
+
 export const ACTION_COLORS: Readonly<Record<RecommendedAction, string>> = {
   ESCALATE: "#C62828",
-  FIX: "#F59E0B",
+  // Amber 700: the brighter amber 500 was 2.1:1 on white, too faint for redline headings and minimap ticks.
+  FIX: "#B45309",
   NONE: "#2E7D32",
 };
 
@@ -241,7 +254,8 @@ export const STATUS_COLORS: Readonly<Record<FindingStatus, string>> = {
   ERROR: "#455A64",
 };
 
-export const UNMAPPED_CLAUSE_COLOR = "#9E9E9E";
+// Grey 600: grey 500 was 2.7:1, below the 3:1 non-text minimum for dashed outlines and ticks.
+export const UNMAPPED_CLAUSE_COLOR = "#757575";
 export const CITATION_HIGHLIGHT_ALPHA = 0.18;
 /** Highlight strength for the focused Finding's Citations. */
 export const FOCUSED_CITATION_HIGHLIGHT_ALPHA = 0.4;
