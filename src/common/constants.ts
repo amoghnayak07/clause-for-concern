@@ -343,6 +343,21 @@ export const OVERVIEW_UI_TEXT = {
   UNMAPPED_HEADING: "Unmapped clauses (not checked against any rule)",
 } as const;
 
+/** Minimap strip beside the Document (DESIGN "UI"). */
+export const MINIMAP = {
+  WIDTH_PX: 14,
+  TICK_HEIGHT_PX: 4,
+  /** Gap between the pinned cluster and the Document track. */
+  PINNED_GAP_PX: 6,
+} as const;
+
+export const MINIMAP_UI_TEXT = {
+  LABEL: "Minimap",
+  NOT_IN_DOCUMENT: "Not in document",
+  UNMAPPED: "Unmapped clause",
+  BLOCKED: "blocked citation",
+} as const;
+
 /* ------------------------------------------------------------------------ */
 /* Citation verification                                                     */
 /* ------------------------------------------------------------------------ */

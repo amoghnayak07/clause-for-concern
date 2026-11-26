@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   KEYBOARD_SHORTCUTS,
   QUEUE_UI_TEXT,
@@ -17,8 +17,10 @@ import type { Clause, ClauseId } from "@/features/document/types";
 import type { Coverage } from "@/features/review/coverage";
 import type { Finding } from "@/features/review/finding";
 import { coverageView, ruleStatusRows } from "@/features/review/overview";
+import { minimapModel } from "@/features/viewer/minimap";
 import { DocumentViewer, type ClauseReveal } from "./DocumentViewer";
 import { FindingList } from "./FindingList";
+import { Minimap } from "./Minimap";
 import { ReviewOverview } from "./ReviewOverview";
 import { useReviewQueue } from "./useReviewQueue";
 
@@ -32,7 +34,7 @@ export interface ReviewWorkspaceProps {
 }
 
 /**
- * Two-pane review: the Document on the left; the Rule status panel, coverage
+ * Two-pane review: the Document and its minimap on the left; the Rule status panel, coverage
  * bar and Review Queue on the right. Purely prop-driven so a streaming source
  * can feed it Findings as they arrive.
  */
@@ -47,6 +49,11 @@ export function ReviewWorkspace({
   const decided = ordered.filter((finding) => state.decisions[finding.ruleId]).length;
   const rows = useMemo(() => ruleStatusRows(findings, state.decisions), [findings, state.decisions]);
   const coverageBar = useMemo(() => coverageView(coverage, clauses, phase), [coverage, clauses, phase]);
+  const minimap = useMemo(
+    () => minimapModel(findings, clauses, coverage, state.decisions),
+    [findings, clauses, coverage, state.decisions],
+  );
+  const viewerRef = useRef<HTMLDivElement>(null);
 
   // A revealed Clause stays outlined until focus moves to another Finding.
   const [reveal, setReveal] = useState<(ClauseReveal & { focusedRuleId: RuleId | null }) | null>(null);
@@ -69,16 +76,31 @@ export function ReviewWorkspace({
         boxSizing: "border-box",
       }}
     >
-      <Paper variant="outlined" sx={{ p: { xs: 2, md: 4 }, overflowY: "auto", minHeight: 0 }}>
-        <DocumentViewer
-          text={text}
+      <Box sx={{ display: "flex", gap: 1, minHeight: 0, minWidth: 0 }}>
+        <Paper
+          ref={viewerRef}
+          variant="outlined"
+          sx={{ flex: 1, minWidth: 0, p: { xs: 2, md: 4 }, overflowY: "auto", minHeight: 0 }}
+        >
+          <DocumentViewer
+            text={text}
+            clauses={clauses}
+            findings={findings}
+            focusedRuleId={state.focusedRuleId}
+            onFocusFinding={focus}
+            revealedClause={revealedClause}
+          />
+        </Paper>
+        <Minimap
+          model={minimap}
           clauses={clauses}
           findings={findings}
+          scrollRef={viewerRef}
           focusedRuleId={state.focusedRuleId}
           onFocusFinding={focus}
-          revealedClause={revealedClause}
+          onRevealClause={revealClause}
         />
-      </Paper>
+      </Box>
       <Box component="aside" sx={{ overflowY: "auto", minHeight: 0, pr: 0.5 }}>
         <ReviewOverview
           rows={rows}
