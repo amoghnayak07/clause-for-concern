@@ -21,6 +21,7 @@ import { coverageView, ruleStatusRows } from "@/features/review/overview";
 import { averageDecisionSummary } from "@/features/review/timing";
 import { minimapModel } from "@/features/viewer/minimap";
 import { DocumentViewer, type ClauseReveal } from "./DocumentViewer";
+import { ExportBar } from "./ExportBar";
 import { FindingList } from "./FindingList";
 import { Minimap } from "./Minimap";
 import { ReviewOverview } from "./ReviewOverview";
@@ -134,6 +135,15 @@ export function ReviewWorkspace({
           </Typography>
         )}
         <ShortcutHint />
+        {ordered.length > 0 && (
+          <ExportBar
+            text={text}
+            clauses={clauses}
+            findings={ordered}
+            decisions={state.decisions}
+            disabled={phase === REVIEW_PHASE.RUNNING}
+          />
+        )}
         <FindingList
           findings={ordered}
           clauses={clauses}

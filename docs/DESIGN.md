@@ -104,8 +104,14 @@ Run config: `maxConcurrency = MAX_CONCURRENCY` (4), `MemorySaver`, `thread_id = 
 - Minimap: one tick per verified Citation at the Clause's measured position; dashed tick for blocked Citations with a real Clause ID; pinned "not in document" cluster at top for positionless Findings (click focuses the queue); grey ticks for Unmapped Clauses; decided ticks dim.
 - Rule status panel and coverage bar ("38 of 41 clauses mapped"); Unmapped Clauses clickable (scroll).
 - Queue: sort by action (ESCALATE → FIX → NONE), then document position, positionless first in group; sorted insert while streaming with focus pinned to Finding ID; auto-advance to next undecided after a Decision; J/K visit all; COMPLIANT at the bottom.
-- Keys (constants): J/K move, A approve, E edit redline inline (jsdiff word diff of the Clause), X escalate + reason, D dismiss + optional reason. On-screen hint.
+- Keys (constants): K next, J previous, A approve, E edit redline inline (jsdiff word diff of the Clause), X escalate + reason, D dismiss + optional reason. On-screen hint.
 - Avg seconds per decision: focus → Decision, each capped at `IDLE_CAP_SECONDS` (60), latest Decision per Finding counts, editing time included.
+
+## Export
+- Two downloads in the queue panel, enabled once the stream ends; undecided Findings export unchanged (with a hint).
+- **Revised Document** (`.txt`): the untouched Document text with every Accepted Redline applied. APPROVE applies the agent's Redline, EDIT the reviewer's text; ESCALATE, DISMISS and undecided apply nothing. REPLACE splices at its verified span; INSERT adds a paragraph (`\n\n`) after its Clause, or at the start when it has none. A REPLACE that overlaps an earlier one in queue order is skipped, never merged; an INSERT with an unknown Clause is skipped.
+- **Review Summary** (`.md`): decided count, escalations with reasons, then every Finding in queue order with Status, Decision, reason and Redline outcome (applied, applied as edited, not applied, skipped and why).
+- Pure (`features/review/export.ts`); the component only builds a Blob and clicks a link. Plain text out even for `.docx` input (formatting was dropped at upload).
 
 ## Eval CLI
 - Loads the same `.env` through the config module. Runs the same compiled graph over `data/*.txt` one document at a time.
@@ -147,6 +153,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 6 | `feat/decision-timer` | Avg seconds per Decision | Resolved (#13) |
 | 6 | `feat/docx-upload` | `.docx` upload (mammoth raw text, extracted in the browser into the input), plus `.txt` | Resolved (#14) |
 | 6 | `feat/theme-polish` | Theme polish: WCAG AA contrast for theme colours, brand colours in constants | Resolved (#15) |
+| 7 | `final-updates` | Export (Revised Document + Review Summary), K next / J previous, README "What I would do next" | Open |
 
 ## README "next"
-Reviewer corrections → eval cases; precision/recall sensitivity slider; auth, database, durable per-rule steps, multi-document matters; prompt caching with cache warming; re-run single rule; one-click "check this clause" for Unmapped Clauses.
+Reviewer corrections → eval cases; precision/recall sensitivity slider; auth, database, durable per-rule steps, multi-document matters; prompt caching with cache warming; re-run single rule (re-review after Decisions); one-click "check this clause" for Unmapped Clauses.
