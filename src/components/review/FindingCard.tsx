@@ -12,6 +12,8 @@ import {
   AGENT_REASONING_LABEL,
   BLOCKED_REASON_LABELS,
   CITATION_HIGHLIGHT_ALPHA,
+  DECIDED_CARD_OPACITY,
+  DECISION_LABELS,
   EXPLANATION_CLAMP_LINES,
   FINDING_SOURCE,
   POSSIBLE_MISS_LABEL,
@@ -23,6 +25,7 @@ import { ConfidenceTick } from "@/components/common/ConfidenceTick";
 import type { Clause } from "@/features/document/types";
 import { recommendedAction } from "@/features/review/derive";
 import type { Finding } from "@/features/review/finding";
+import type { Decision } from "@/features/review/queue";
 import {
   blockedCitationHeadline,
   blockedCitationViews,
@@ -42,9 +45,13 @@ export interface FindingCardProps {
   text: string;
   focused?: boolean;
   onFocus?: () => void;
+  /** The reviewer's latest Decision on this Finding. */
+  decision?: Decision;
+  /** Inline Decision editor, shown at the bottom of the card. */
+  children?: ReactNode;
 }
 
-export function FindingCard({ finding, clauses, text, focused = false, onFocus }: FindingCardProps) {
+export function FindingCard({ finding, clauses, text, focused = false, onFocus, decision, children }: FindingCardProps) {
   const theme = useTheme();
   const action = recommendedAction(finding);
   const actionColor = theme.palette.review.action[action];
@@ -66,7 +73,7 @@ export function FindingCard({ finding, clauses, text, focused = false, onFocus }
       component="article"
       variant="outlined"
       tabIndex={0}
-      aria-label={`${title}: ${STATUS_LABELS[finding.status]}`}
+      aria-label={`${title}: ${STATUS_LABELS[finding.status]}${decision ? `, ${DECISION_LABELS[decision.kind]}` : ""}`}
       aria-current={focused || undefined}
       data-rule-id={finding.ruleId}
       onClick={onFocus}
@@ -75,6 +82,7 @@ export function FindingCard({ finding, clauses, text, focused = false, onFocus }
         p: 2,
         cursor: onFocus ? "pointer" : undefined,
         borderLeft: `4px solid ${actionColor}`,
+        ...(decision && !focused && { opacity: DECIDED_CARD_OPACITY }),
         ...(focused && { borderColor: actionColor, boxShadow: `0 0 0 1px ${actionColor}` }),
         "&:focus-visible": { outline: `2px solid ${actionColor}`, outlineOffset: 2 },
       }}
@@ -84,6 +92,7 @@ export function FindingCard({ finding, clauses, text, focused = false, onFocus }
         <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600, flexGrow: 1, lineHeight: 1.3 }}>
           {title}
         </Typography>
+        {decision && <Chip size="small" variant="outlined" label={DECISION_LABELS[decision.kind]} />}
         <Chip
           size="small"
           label={ACTION_LABELS[action]}
@@ -132,7 +141,24 @@ export function FindingCard({ finding, clauses, text, focused = false, onFocus }
           {finding.verifierNote}
         </AgentText>
       )}
+
+      {decision && <DecisionSummary decision={decision} />}
+      {children}
     </Paper>
+  );
+}
+
+/** The reviewer's own words on the Finding: an escalation/dismissal reason or edited Redline. */
+function DecisionSummary({ decision }: { decision: Decision }) {
+  const detail = decision.reason ?? decision.editedReplacement;
+  if (detail === null) return null;
+  return (
+    <Typography variant="body2" component="p" sx={{ mt: 1, whiteSpace: "pre-wrap" }}>
+      <Box component="span" sx={{ fontWeight: 600 }}>
+        {DECISION_LABELS[decision.kind]}:
+      </Box>{" "}
+      {detail}
+    </Typography>
   );
 }
 

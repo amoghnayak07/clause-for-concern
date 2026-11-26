@@ -300,6 +300,39 @@ export const KEYBOARD_SHORTCUTS = {
 } as const;
 export type ShortcutAction = keyof typeof KEYBOARD_SHORTCUTS;
 
+/** On-screen hint, in display order. */
+export const SHORTCUT_HINTS: readonly { readonly action: ShortcutAction; readonly label: string }[] = [
+  { action: "NEXT", label: "next" },
+  { action: "PREVIOUS", label: "previous" },
+  { action: "APPROVE", label: "approve" },
+  { action: "EDIT", label: "edit redline" },
+  { action: "ESCALATE", label: "escalate" },
+  { action: "DISMISS", label: "dismiss" },
+];
+
+export const DECISION_LABELS: Readonly<Record<DecisionKind, string>> = {
+  APPROVE: "Approved",
+  EDIT: "Edited",
+  ESCALATE: "Escalated",
+  DISMISS: "Dismissed",
+};
+
+/** Decided, unfocused cards fade so the remaining work stands out. */
+export const DECIDED_CARD_OPACITY = 0.6;
+
+export const QUEUE_UI_TEXT = {
+  HEADING: "Review queue",
+  EDIT_LABEL: "Redline text",
+  EDIT_HELP: "Enter to save, Shift+Enter for a new line, Esc to cancel.",
+  DIFF_LABEL: "Clause after your edit",
+  ESCALATE_LABEL: "Why escalate? (required)",
+  DISMISS_LABEL: "Why dismiss? (optional)",
+  REASON_HELP: "Enter to save, Esc to cancel.",
+  SAVE: "Save",
+  CANCEL: "Cancel",
+  ALL_DECIDED: "All findings decided",
+} as const;
+
 /* ------------------------------------------------------------------------ */
 /* Citation verification                                                     */
 /* ------------------------------------------------------------------------ */

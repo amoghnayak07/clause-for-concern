@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import type { RuleId } from "@/common/constants";
+import { KEYBOARD_SHORTCUTS, QUEUE_UI_TEXT, SHORTCUT_HINTS } from "@/common/constants";
 import type { Clause } from "@/features/document/types";
 import type { Finding } from "@/features/review/finding";
 import { DocumentViewer } from "./DocumentViewer";
 import { FindingList } from "./FindingList";
+import { useReviewQueue } from "./useReviewQueue";
 
 export interface ReviewWorkspaceProps {
   text: string;
@@ -17,11 +18,12 @@ export interface ReviewWorkspaceProps {
 }
 
 /**
- * Two-pane review: the Document on the left, Finding cards on the right.
+ * Two-pane review: the Document on the left, the Review Queue on the right.
  * Purely prop-driven so a streaming source can feed it Findings as they arrive.
  */
 export function ReviewWorkspace({ text, clauses, findings }: ReviewWorkspaceProps) {
-  const [focusedRuleId, setFocusedRuleId] = useState<RuleId | null>(null);
+  const { ordered, state, focus, setDraft, cancel, submit } = useReviewQueue(findings, clauses);
+  const decided = ordered.filter((finding) => state.decisions[finding.ruleId]).length;
 
   return (
     <Box
@@ -39,22 +41,54 @@ export function ReviewWorkspace({ text, clauses, findings }: ReviewWorkspaceProp
           text={text}
           clauses={clauses}
           findings={findings}
-          focusedRuleId={focusedRuleId}
-          onFocusFinding={setFocusedRuleId}
+          focusedRuleId={state.focusedRuleId}
+          onFocusFinding={focus}
         />
       </Paper>
       <Box component="aside" sx={{ overflowY: "auto", minHeight: 0, pr: 0.5 }}>
-        <Typography variant="h6" component="h2" sx={{ mb: 1.5 }}>
-          Findings
-        </Typography>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 0.5 }}>
+          <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
+            {QUEUE_UI_TEXT.HEADING}
+          </Typography>
+          {ordered.length > 0 && (
+            <Typography variant="body2" color="text.secondary" role="status" aria-live="polite">
+              {decided === ordered.length ? QUEUE_UI_TEXT.ALL_DECIDED : `${decided} of ${ordered.length} decided`}
+            </Typography>
+          )}
+        </Stack>
+        <ShortcutHint />
         <FindingList
-          findings={findings}
+          findings={ordered}
           clauses={clauses}
           text={text}
-          focusedRuleId={focusedRuleId}
-          onFocusFinding={setFocusedRuleId}
+          focusedRuleId={state.focusedRuleId}
+          onFocusFinding={focus}
+          decisions={state.decisions}
+          mode={state.mode}
+          onDraft={setDraft}
+          onSubmit={submit}
+          onCancel={cancel}
         />
       </Box>
     </Box>
+  );
+}
+
+function ShortcutHint() {
+  return (
+    <Typography variant="caption" component="p" color="text.secondary" sx={{ mb: 1.5 }}>
+      {SHORTCUT_HINTS.map(({ action, label }, index) => (
+        <Box component="span" key={action} sx={{ whiteSpace: "nowrap" }}>
+          {index > 0 && " · "}
+          <Box
+            component="kbd"
+            sx={{ px: 0.5, border: 1, borderColor: "divider", borderRadius: 0.5, fontFamily: "monospace" }}
+          >
+            {KEYBOARD_SHORTCUTS[action].toUpperCase()}
+          </Box>{" "}
+          {label}
+        </Box>
+      ))}
+    </Typography>
   );
 }

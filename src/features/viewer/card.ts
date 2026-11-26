@@ -1,3 +1,4 @@
+import { diffWords } from "diff";
 import { PLAYBOOK, REDLINE_KIND, type BlockedReason, type RuleId } from "@/common/constants";
 import type { Clause, ClauseId } from "@/features/document/types";
 import type { Finding } from "@/features/review/finding";
@@ -101,6 +102,39 @@ export function redlineView(
 export function redlineHeadline(view: RedlineView): string {
   if (view.kind === REDLINE_KIND.REPLACE) return `Replace in ${view.clauseLabel}`;
   return view.afterClauseLabel === null ? "Insert at the start of the document" : `Insert after ${view.afterClauseLabel}`;
+}
+
+export interface DiffPart {
+  readonly kind: "equal" | "added" | "removed";
+  readonly text: string;
+}
+
+/**
+ * Word diff of the Redline's target Clause before and after a draft edit
+ * (DESIGN "Keys": jsdiff word diff of the Clause). REPLACE splices the draft
+ * into the Clause at the verified span; INSERT has no existing text, so the
+ * whole draft is added. Null when the Finding has no Redline.
+ */
+export function redlineDiff(
+  finding: Pick<Finding, "redline">,
+  clauses: readonly Clause[],
+  text: string,
+  draft: string,
+): DiffPart[] | null {
+  const redline = finding.redline;
+  if (!redline) return null;
+  if (redline.kind === REDLINE_KIND.INSERT) return draft === "" ? [] : [{ kind: "added", text: draft }];
+
+  const clause = clauseMap(clauses).get(redline.clauseId);
+  // Defensive: fall back to the span alone if the Clause is unknown.
+  const start = clause ? clause.start : redline.start;
+  const end = clause ? clause.end : redline.end;
+  const before = text.slice(start, end);
+  const after = text.slice(start, redline.start) + draft + text.slice(redline.end, end);
+  return diffWords(before, after).map((change) => ({
+    kind: change.added ? "added" : change.removed ? "removed" : "equal",
+    text: change.value,
+  }));
 }
 
 function clauseMap(clauses: readonly Clause[]): Map<ClauseId, Clause> {
