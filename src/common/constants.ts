@@ -366,6 +366,30 @@ export const MAX_DOCUMENT_CHARS = 200_000;
 /** Shown to the client when a run fails; details are logged server-side. */
 export const REVIEW_FAILED_MESSAGE = "The review failed. Please try again.";
 
+/** Client-side lifecycle of one review. Cancelling returns to IDLE. */
+export const REVIEW_PHASE = {
+  IDLE: "idle",
+  RUNNING: "running",
+  DONE: "done",
+  FAILED: "failed",
+} as const;
+export type ReviewPhase = ValueOf<typeof REVIEW_PHASE>;
+
+/** Copy for the review input and run status. */
+export const REVIEW_UI_TEXT = {
+  INPUT_LABEL: "NDA text",
+  INPUT_PLACEHOLDER: "Paste the NDA here.",
+  SUBMIT: "Review",
+  LOAD_SAMPLE: "Load sample NDA",
+  CANCEL: "Cancel",
+  NEW_REVIEW: "New review",
+  SEGMENTING: "Splitting the document into clauses…",
+  RUNNING: "Reviewing",
+  DONE: "Review complete",
+  TOO_LONG: "The document is too long.",
+  UNEXPECTED_ERROR: "Something went wrong while reading the review. Please try again.",
+} as const;
+
 /* ------------------------------------------------------------------------ */
 /* Review metrics                                                            */
 /* ------------------------------------------------------------------------ */

@@ -14,8 +14,8 @@ import type { Clause, ClauseId } from "@/features/document/types";
 import type { Finding } from "@/features/review/finding";
 
 /**
- * Static demo review for the workspace until the streaming route is wired in.
- * Clauses come from the real splitter and every offset is computed from
+ * Demo review: `DEMO_TEXT` backs the input's "Load sample NDA" button; the
+ * Clauses and hand-written Findings exercise the viewer in tests. Clauses come from the real splitter and every offset is computed from
  * substrings of the text, so the fixture can't drift from the Document.
  */
 
