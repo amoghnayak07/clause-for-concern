@@ -140,6 +140,7 @@ One branch per row, in build order. A row is **Resolved** once its PR is raised;
 | 2 | `feat/eval-cli` | Eval CLI over `data/*.txt`: label validation, per-rule recall/precision, citation pass rates, tokens, cost | Resolved (#7) |
 | 3 | `feat/review-route` | `POST /api/review` streaming (`clauses` → `finding` → `coverage` → `done`) | Resolved (#8) |
 | 3 | `feat/viewer` | Document viewer with Citation highlights, finding cards (incl. blocked citation card, Agent's Reasoning) | Resolved (#9) |
+| 3 | `fix/clause-labels-title` | Live review: paste input wired to the `/api/review` stream (cancel, retry, progress); `§` Clause labels; page title | Resolved (#10) |
 | 3 | `feat/keyboard-queue` | Review Queue ordering, J/K/A/E/X/D Decisions, inline redline edit with word diff | Open |
 | 4 | `feat/rule-status-coverage` | Rule status panel, coverage bar, clickable Unmapped Clauses | Open |
 | 5 | `feat/minimap` | Minimap ticks, blocked/positionless/unmapped markers | Open |
