@@ -62,6 +62,7 @@ Decisions live only in the browser tab; reloading or starting a new review disca
 - **Persist decisions**: auth and a database so a review survives a reload, plus durable per-rule steps and multi-document matters.
 - **`.docx` export**: write redlines back as tracked changes in the uploaded file instead of plain text.
 - **Model-side injection detection**: a flag in the detector's output that stops a running review, to catch paraphrased injections the pattern check misses.
+- **Observability with Langfuse**: trace every review end to end. That means one trace per review, with a span for each per-rule detector and verifier call, holding the prompt, output, latency, tokens and cost. Include citation-verification failures and retries. Then a bad finding in production can be traced to the exact model call behind it. Tag eval CLI runs the same way so their scores can be compared with live traffic across prompt and model changes.
 - **Precision/recall sensitivity slider**.
 - **Prompt caching** with cache warming.
 - **One-click "check this clause"** for Unmapped Clauses.
