@@ -14,8 +14,8 @@ import type { Clause, ClauseId } from "@/features/document/types";
 import type { Finding } from "@/features/review/finding";
 
 /**
- * Static demo review for the workspace until the streaming route is wired in.
- * Clauses come from the real splitter and every offset is computed from
+ * Demo review: `DEMO_TEXT` backs the input's "Load sample NDA" button; the
+ * Clauses and hand-written Findings exercise the viewer in tests. Clauses come from the real splitter and every offset is computed from
  * substrings of the text, so the fixture can't drift from the Document.
  */
 
@@ -80,7 +80,7 @@ export const DEMO_FINDINGS: readonly Finding[] = [
     blockedCitations: [],
     redline: null,
     explanation:
-      "Both parties disclose and receive, and the confidentiality obligation in A3 binds each party equally.",
+      "Both parties disclose and receive, and the confidentiality obligation in §3 binds each party equally.",
     verifierNote: null,
     error: null,
     attempts: 1,
@@ -128,7 +128,7 @@ export const DEMO_FINDINGS: readonly Finding[] = [
     blockedCitations: [{ clauseId: null, reason: BLOCKED_REASON.UNKNOWN_CLAUSE }],
     redline: null,
     explanation:
-      "A4 restricts soliciting the other party's employees for twelve months, which the playbook prohibits.",
+      "§4 restricts soliciting the other party's employees for twelve months, which the playbook prohibits.",
     verifierNote:
       "Lowered confidence: the restriction is limited to employees met under the agreement; a reviewer should decide whether to strike it.",
     error: null,

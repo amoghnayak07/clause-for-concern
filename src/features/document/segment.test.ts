@@ -25,7 +25,7 @@ describe("segmentDocument", () => {
     ].join("\n");
     const clauses = segmentDocument(doc);
 
-    expect(labels(clauses)).toEqual(["P1", "A1", "A1.1", "A1.2", "A2"]);
+    expect(labels(clauses)).toEqual(["P1", "§1", "§1.1", "§1.2", "§2"]);
     expect(clauses.map((c) => c.id)).toEqual(["c-001", "c-002", "c-003", "c-004", "c-005"]);
     expect(textOf(doc, clauses[1])).toBe("1. Definitions");
     expect(clauses[2]).toMatchObject({ parentId: "c-002", depth: 1 });
@@ -45,7 +45,7 @@ describe("segmentDocument", () => {
     ].join("\n");
     const clauses = segmentDocument(doc);
 
-    expect(labels(clauses)).toEqual(["A1", "A1.01", "A1.02", "A2", "A2.01"]);
+    expect(labels(clauses)).toEqual(["§1", "§1.01", "§1.02", "§2", "§2.01"]);
     expect(textOf(doc, clauses[0])).toBe("ARTICLE I\nDEFINITIONS");
     expect(clauses[1].parentId).toBe(clauses[0].id);
     expect(clauses[4].parentId).toBe(clauses[3].id);
@@ -79,13 +79,13 @@ describe("segmentDocument", () => {
     const clauses = segmentDocument(doc);
 
     expect(labels(clauses)).toEqual([
-      "P1", "P2", "A1", "A1(a)", "A1(b)", "A1(b)(i)", "A1(b)(ii)", "A1(c)",
-      "A1(d)", "A1(e)", "A1(f)", "A1(g)", "A1(h)", "A1(i)", "A2",
+      "P1", "P2", "§1", "§1(a)", "§1(b)", "§1(b)(i)", "§1(b)(ii)", "§1(c)",
+      "§1(d)", "§1(e)", "§1(f)", "§1(g)", "§1(h)", "§1(i)", "§2",
     ]);
     const byLabel = new Map(clauses.map((c) => [c.label, c]));
-    expect(byLabel.get("A1(b)(i)")).toMatchObject({ parentId: byLabel.get("A1(b)")!.id, depth: 2 });
-    expect(byLabel.get("A1(i)")).toMatchObject({ parentId: byLabel.get("A1")!.id, depth: 1 });
-    expect(textOf(doc, byLabel.get("A1(a)")!)).toBe("(a) \"Affiliate\" means a controlled entity;");
+    expect(byLabel.get("§1(b)(i)")).toMatchObject({ parentId: byLabel.get("§1(b)")!.id, depth: 2 });
+    expect(byLabel.get("§1(i)")).toMatchObject({ parentId: byLabel.get("§1")!.id, depth: 1 });
+    expect(textOf(doc, byLabel.get("§1(a)")!)).toBe("(a) \"Affiliate\" means a controlled entity;");
   });
 
   it("copes with PDF-style hard wraps and mixed Section 3 / 3.1", () => {
@@ -99,7 +99,7 @@ describe("segmentDocument", () => {
     ].join("\n");
     const clauses = segmentDocument(doc);
 
-    expect(labels(clauses)).toEqual(["A3", "A3.1", "A3.2"]);
+    expect(labels(clauses)).toEqual(["§3", "§3.1", "§3.2"]);
     expect(clauses[1].parentId).toBe(clauses[0].id);
     expect(textOf(doc, clauses[1])).toContain("3.1 above.");
   });

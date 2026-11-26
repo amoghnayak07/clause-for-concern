@@ -8,6 +8,9 @@
 
 type ValueOf<T> = T[keyof T];
 
+/** Product name: page title and the workspace heading. */
+export const APP_NAME = "Clause for Concern";
+
 /* ------------------------------------------------------------------------ */
 /* Playbook                                                                  */
 /* ------------------------------------------------------------------------ */
@@ -126,11 +129,11 @@ export const CLAUSE_ID_PREFIX = "c-";
 export const CLAUSE_ID_PAD_LENGTH = 3;
 
 /**
- * Clause label prefixes: numbered Clauses read "A3.2(a)", unnumbered
+ * Clause label prefixes: numbered Clauses read "§3.2(a)", unnumbered
  * blank-line paragraphs read "P1", "P2", ...
  */
 export const CLAUSE_LABEL_PREFIX = {
-  NUMBERED: "A",
+  NUMBERED: "§",
   PARAGRAPH: "P",
 } as const;
 
@@ -362,6 +365,36 @@ export const NDJSON_CONTENT_TYPE = "application/x-ndjson";
 export const MAX_DOCUMENT_CHARS = 200_000;
 /** Shown to the client when a run fails; details are logged server-side. */
 export const REVIEW_FAILED_MESSAGE = "The review failed. Please try again.";
+
+/** Client-side lifecycle of one review. Cancelling returns to IDLE. */
+export const REVIEW_PHASE = {
+  IDLE: "idle",
+  RUNNING: "running",
+  DONE: "done",
+  FAILED: "failed",
+} as const;
+export type ReviewPhase = ValueOf<typeof REVIEW_PHASE>;
+
+/**
+ * Fixed locale for numbers in the UI. Server and browser must format
+ * identically or hydration fails (e.g. en-IN renders 200000 as "2,00,000").
+ */
+export const UI_NUMBER_LOCALE = "en-US";
+
+/** Copy for the review input and run status. */
+export const REVIEW_UI_TEXT = {
+  INPUT_LABEL: "NDA text",
+  INPUT_PLACEHOLDER: "Paste the NDA here.",
+  SUBMIT: "Review",
+  LOAD_SAMPLE: "Load sample NDA",
+  CANCEL: "Cancel",
+  NEW_REVIEW: "New review",
+  SEGMENTING: "Splitting the document into clauses…",
+  RUNNING: "Reviewing",
+  DONE: "Review complete",
+  TOO_LONG: "The document is too long.",
+  UNEXPECTED_ERROR: "Something went wrong while reading the review. Please try again.",
+} as const;
 
 /* ------------------------------------------------------------------------ */
 /* Review metrics                                                            */

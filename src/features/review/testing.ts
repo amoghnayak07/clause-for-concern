@@ -23,7 +23,7 @@ export const sampleFinding: Finding = {
 export const sampleEvents: readonly ReviewEvent[] = [
   {
     event: STREAM_EVENT.CLAUSES,
-    clauses: [{ id: "c-001", label: "A1", parentId: null, depth: 0, start: 0, end: 40 }],
+    clauses: [{ id: "c-001", label: "§1", parentId: null, depth: 0, start: 0, end: 40 }],
   },
   { event: STREAM_EVENT.FINDING, finding: sampleFinding },
   { event: STREAM_EVENT.COVERAGE, coverage: { available: true, covered: 1, total: 1, unmappedClauseIds: [] } },

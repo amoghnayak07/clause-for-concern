@@ -8,7 +8,7 @@ import { buildViewerBlocks } from "./segments";
 
 describe("demo fixture", () => {
   it("segments into numbered Clauses with labels", () => {
-    expect(DEMO_CLAUSES.map((c) => c.label)).toEqual(["P1", "P2", "A1", "A2", "A2(a)", "A2(b)", "A2(c)", "A3", "A4", "A5", "A6"]);
+    expect(DEMO_CLAUSES.map((c) => c.label)).toEqual(["P1", "P2", "§1", "§2", "§2(a)", "§2(b)", "§2(c)", "§3", "§4", "§5", "§6"]);
   });
 
   it("has exactly one Finding per Rule", () => {

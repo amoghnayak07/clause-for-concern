@@ -30,7 +30,7 @@ export function ReviewWorkspace({ text, clauses, findings }: ReviewWorkspaceProp
         gridTemplateColumns: { xs: "1fr", md: "minmax(0, 3fr) minmax(320px, 2fr)" },
         gap: 2,
         p: 2,
-        height: { md: "100vh" },
+        height: { md: "100%" },
         boxSizing: "border-box",
       }}
     >

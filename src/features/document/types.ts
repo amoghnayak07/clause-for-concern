@@ -9,7 +9,7 @@ export type ClauseId = string;
  */
 export interface Clause {
   readonly id: ClauseId;
-  /** Human label, e.g. "A3.2(a)" for numbered Clauses or "P2" for paragraphs. */
+  /** Human label, e.g. "§3.2(a)" for numbered Clauses or "P2" for paragraphs. */
   readonly label: string;
   readonly parentId: ClauseId | null;
   /** 0 for top-level Clauses. */
