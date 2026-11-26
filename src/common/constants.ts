@@ -375,6 +375,12 @@ export const REVIEW_PHASE = {
 } as const;
 export type ReviewPhase = ValueOf<typeof REVIEW_PHASE>;
 
+/**
+ * Fixed locale for numbers in the UI. Server and browser must format
+ * identically or hydration fails (e.g. en-IN renders 200000 as "2,00,000").
+ */
+export const UI_NUMBER_LOCALE = "en-US";
+
 /** Copy for the review input and run status. */
 export const REVIEW_UI_TEXT = {
   INPUT_LABEL: "NDA text",

@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { MAX_DOCUMENT_CHARS, REVIEW_UI_TEXT } from "@/common/constants";
+import { MAX_DOCUMENT_CHARS, REVIEW_UI_TEXT, UI_NUMBER_LOCALE } from "@/common/constants";
 import { DEMO_TEXT } from "@/features/viewer/fixture";
 
 export interface ReviewInputProps {
@@ -17,6 +17,7 @@ export interface ReviewInputProps {
 }
 
 const INPUT_ROWS = 18;
+const formatCount = new Intl.NumberFormat(UI_NUMBER_LOCALE).format;
 
 /** Paste box for the Document. The text is sent untouched so offsets match. */
 export function ReviewInput({ initialText, error, onSubmit }: ReviewInputProps) {
@@ -44,7 +45,7 @@ export function ReviewInput({ initialText, error, onSubmit }: ReviewInputProps) 
           fullWidth
           autoFocus
           error={tooLong}
-          helperText={`${tooLong ? `${REVIEW_UI_TEXT.TOO_LONG} ` : ""}${text.length.toLocaleString()} / ${MAX_DOCUMENT_CHARS.toLocaleString()}`}
+          helperText={`${tooLong ? `${REVIEW_UI_TEXT.TOO_LONG} ` : ""}${formatCount(text.length)} / ${formatCount(MAX_DOCUMENT_CHARS)}`}
           slotProps={{ htmlInput: { spellCheck: false, sx: { fontFamily: "monospace" } } }}
         />
         <Stack direction="row" spacing={1}>
