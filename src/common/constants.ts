@@ -503,6 +503,57 @@ export const NDA_CHECK_TEXT = {
   REVIEW_ANYWAY: "Review anyway",
 } as const;
 
+/**
+ * Prompt-injection check (DESIGN "Input check"): deterministic patterns run in
+ * the browser before submit and again in `POST /api/review`. A match stops the
+ * review before any model call. Patterns are deliberately narrow, phrasing an
+ * NDA would not use, because a match blocks rather than warns. Matched
+ * case-insensitively; `m` lets `^` anchor chat-turn markers to a line start.
+ */
+export const INJECTION_PATTERNS: readonly { readonly id: string; readonly label: string; readonly source: string }[] = [
+  {
+    id: "OVERRIDE_INSTRUCTIONS",
+    label: "Asks to ignore or override instructions",
+    source:
+      String.raw`\b(?:ignore|disregard|forget|override|bypass)\s+(?:(?:all|any|every|the|your|my|of|previous|prior|above|earlier|preceding|system|developer)\s+)*?` +
+      String.raw`(?:all|any|your|previous|prior|above|earlier|preceding|system|developer)\s+(?:instructions?|prompts?|rules|guidelines|directives|messages?)\b`,
+  },
+  {
+    id: "SYSTEM_PROMPT",
+    label: "Refers to the AI's system prompt",
+    source: String.raw`\bsystem\s+(?:prompts?|messages?)\b`,
+  },
+  {
+    id: "SECRET_REQUEST",
+    label: "Asks for keys or secrets",
+    source:
+      String.raw`\b(?:give|show|reveal|print|tell|send|share|output|display|leak|dump|return)\b[^.\n]{0,40}?` +
+      String.raw`(?:\bapi[\s_-]?keys?\b|\bsecret\s+keys?\b|\baccess\s+tokens?\b|\benvironment\s+variables?\b|\.env\b)`,
+  },
+  {
+    id: "ROLE_HIJACK",
+    label: "Tries to change the AI's role",
+    source: String.raw`\byou\s+are\s+now\b|\bpretend\s+(?:to\s+be|you\s+are)\b|\bfrom\s+now\s+on,?\s+you\b|\bnew\s+instructions\s*:|\bjailbreak\b|\bdeveloper\s+mode\b`,
+  },
+  {
+    id: "CHAT_MARKUP",
+    label: "Contains chat-turn or prompt markup",
+    source: String.raw`^\s*(?:system|assistant|user|human)\s*:|<\/?(?:system|instructions?|document|excerpt|clause|rule|finding)\b[^>]*>`,
+  },
+];
+
+/** Characters of context shown either side of a matched passage. */
+export const INJECTION_CONTEXT_CHARS = 30;
+
+export const INJECTION_TEXT = {
+  TITLE: "Review stopped: possible prompt injection",
+  BODY: "This text contains instructions aimed at the AI rather than contract terms, so the review was not started and nothing was sent to the model.",
+  ACTION: "Remove or rewrite the passages below to continue.",
+  /** Returned by `POST /api/review`; the browser shows the passages itself. */
+  SERVER_MESSAGE:
+    "Review stopped: the text contains instructions aimed at the AI (possible prompt injection). Remove them and try again.",
+} as const;
+
 /** Copy for the review input and run status. */
 export const REVIEW_UI_TEXT = {
   INPUT_LABEL: "NDA text",
