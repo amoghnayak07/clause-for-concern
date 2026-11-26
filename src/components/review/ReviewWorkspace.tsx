@@ -17,6 +17,7 @@ import {
 import type { Clause, ClauseId } from "@/features/document/types";
 import type { Coverage } from "@/features/review/coverage";
 import type { Finding } from "@/features/review/finding";
+import { acceptedRedlines, planRevision } from "@/features/review/export";
 import { coverageView, ruleStatusRows } from "@/features/review/overview";
 import { averageDecisionSummary } from "@/features/review/timing";
 import { minimapModel } from "@/features/viewer/minimap";
@@ -57,6 +58,11 @@ export function ReviewWorkspace({
     () => minimapModel(findings, clauses, coverage, state.decisions),
     [findings, clauses, coverage, state.decisions],
   );
+  // Accepted Redlines show in the Document as soon as they are decided.
+  const splices = useMemo(
+    () => planRevision(clauses, acceptedRedlines(ordered, state.decisions)).splices,
+    [clauses, ordered, state.decisions],
+  );
   const viewerRef = useRef<HTMLDivElement>(null);
 
   // A revealed Clause stays outlined until focus moves to another Finding.
@@ -93,6 +99,7 @@ export function ReviewWorkspace({
             focusedRuleId={state.focusedRuleId}
             onFocusFinding={focus}
             revealedClause={revealedClause}
+            splices={splices}
           />
         </Paper>
         <Minimap

@@ -53,26 +53,30 @@ export function acceptedRedlines(
   return accepted;
 }
 
-interface Splice {
+/** One edit to the original Document: `[start, end)` becomes `text`. Zero-width for an INSERT. */
+export interface Splice {
   readonly ruleId: RuleId;
   readonly start: number;
   readonly end: number;
+  /** Exactly what lands in the Revised Document, paragraph break included for an INSERT. */
   readonly text: string;
-  /** Tie-break for splices at the same offset: earlier in the queue lands first. */
+  /** Position in queue order; among INSERTs at one offset the earlier lands first. */
   readonly order: number;
 }
 
+export interface RevisionPlan {
+  /** In queue order. Never overlapping (zero-width INSERTs may share an offset). */
+  readonly splices: readonly Splice[];
+  readonly skipped: RevisedDocument["skipped"];
+}
+
 /**
- * Applies Accepted Redlines to the untouched Document text. REPLACE splices at
- * its verified span; INSERT adds a new paragraph after its Clause (or at the
- * start). A REPLACE overlapping one earlier in the queue is skipped rather than
- * guessed at, and reported.
+ * Where each Accepted Redline lands in the original Document. REPLACE takes its
+ * verified span; INSERT adds a new paragraph after its Clause (or at the start).
+ * A REPLACE overlapping one earlier in the queue is skipped rather than guessed
+ * at, and reported. Shared by the Revised Document and the viewer's tracked changes.
  */
-export function reviseDocument(
-  text: string,
-  clauses: readonly Clause[],
-  accepted: readonly AcceptedRedline[],
-): RevisedDocument {
+export function planRevision(clauses: readonly Clause[], accepted: readonly AcceptedRedline[]): RevisionPlan {
   const byId = new Map(clauses.map((clause) => [clause.id, clause]));
   const splices: Splice[] = [];
   const skipped: RevisedDocument["skipped"][number][] = [];
@@ -98,6 +102,16 @@ export function reviseDocument(
     }
     splices.push({ ruleId, start: after.end, end: after.end, text: `${EXPORT_TEXT.PARAGRAPH_BREAK}${written}`, order });
   });
+  return { splices, skipped };
+}
+
+/** The untouched Document text with every Accepted Redline applied (see `planRevision`). */
+export function reviseDocument(
+  text: string,
+  clauses: readonly Clause[],
+  accepted: readonly AcceptedRedline[],
+): RevisedDocument {
+  const { splices, skipped } = planRevision(clauses, accepted);
 
   // Splice from the end so earlier offsets stay valid. At one offset a REPLACE
   // goes first (an INSERT there then lands in front of it, not inside it), and

@@ -9,6 +9,7 @@ import {
 } from "@/common/constants";
 import type { Clause, ClauseId } from "@/features/document/types";
 import { recommendedAction } from "@/features/review/derive";
+import type { Splice } from "@/features/review/export";
 import type { Finding } from "@/features/review/finding";
 
 /**
@@ -34,6 +35,16 @@ export interface TextRun {
   readonly highlights: readonly Highlight[];
   /** Citations that begin at this run's start (scroll anchors). */
   readonly anchors: readonly Highlight[];
+  /** The Accepted Redline replacing this run, shown struck through. */
+  readonly struckBy: RuleId | null;
+  /** Accepted Redline text that lands at this run's end, in Revised Document order. */
+  readonly insertsAfter: readonly Insertion[];
+}
+
+/** Text an Accepted Redline adds to the Document (a REPLACE's replacement or an INSERT). */
+export interface Insertion {
+  readonly ruleId: RuleId;
+  readonly text: string;
 }
 
 export interface ViewerBlock {
@@ -60,18 +71,39 @@ export function compareHighlights(a: Highlight, b: Highlight): number {
   );
 }
 
+/**
+ * `splices` are the Accepted Redlines (`planRevision`), drawn as tracked
+ * changes: the original span stays (struck through) so Citation offsets and
+ * highlights are untouched, and the new text follows it.
+ */
 export function buildViewerBlocks(
   text: string,
   clauses: readonly Clause[],
   findings: readonly Finding[],
+  splices: readonly Splice[] = [],
 ): ViewerBlock[] {
   const citations = placeCitations(text, findings);
+  const edits = splices.filter((s) => s.start >= 0 && s.end <= text.length && s.end >= s.start);
   return blockSpans(text, clauses).map(({ clause, start, end }) => ({
     clause,
     start,
     end,
-    runs: buildRuns(start, end, citations),
+    runs: buildRuns(start, end, citations, edits),
   }));
+}
+
+/** Accepted Redline text placed before the first character (an INSERT at the start of the Document). */
+export function leadingInsertions(splices: readonly Splice[]): Insertion[] {
+  return insertionsAt(0, splices);
+}
+
+/** Text landing at `offset`: a REPLACE ending there first, then INSERTs in queue order (as in `reviseDocument`). */
+function insertionsAt(offset: number, splices: readonly Splice[]): Insertion[] {
+  return splices
+    .filter((s) => s.end === offset)
+    .sort((a, b) => b.end - b.start - (a.end - a.start) || a.order - b.order)
+    .filter((s) => s.text !== "")
+    .map(({ ruleId, text }) => ({ ruleId, text }));
 }
 
 function placeCitations(text: string, findings: readonly Finding[]): PlacedCitation[] {
@@ -102,10 +134,15 @@ function blockSpans(text: string, clauses: readonly Clause[]): Array<Omit<Viewer
   return spans;
 }
 
-function buildRuns(start: number, end: number, citations: readonly PlacedCitation[]): TextRun[] {
+function buildRuns(
+  start: number,
+  end: number,
+  citations: readonly PlacedCitation[],
+  edits: readonly Splice[],
+): TextRun[] {
   if (end <= start) return [];
   const boundaries = new Set([start, end]);
-  for (const c of citations) {
+  for (const c of [...citations, ...edits]) {
     if (c.start > start && c.start < end) boundaries.add(c.start);
     if (c.end > start && c.end < end) boundaries.add(c.end);
   }
@@ -121,6 +158,8 @@ function buildRuns(start: number, end: number, citations: readonly PlacedCitatio
       end: runEnd,
       highlights: covering.map(toHighlight).sort(compareHighlights),
       anchors: covering.filter((c) => c.start === runStart).map(toHighlight).sort(compareHighlights),
+      struckBy: edits.find((s) => s.start <= runStart && s.end >= runEnd)?.ruleId ?? null,
+      insertsAfter: insertionsAt(runEnd, edits),
     });
   }
   return runs;

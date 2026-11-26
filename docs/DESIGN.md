@@ -99,6 +99,7 @@ Run config: `maxConcurrency = MAX_CONCURRENCY` (4), `MemorySaver`, `thread_id = 
 
 ## UI
 - Viewer renders original text sliced by offsets; highlights from Citations only.
+- Accepted Redlines show in the viewer as tracked changes the moment they are decided: the original span stays, struck through (its Citation highlight intact), with the new text in an `<ins>` right after it; INSERTs appear after their Clause. Same placement as the Revised Document (`planRevision`), so screen and download agree. Inserted text is marked as Redline text, never as Document text (ADR 0002).
 - Blocked citation card: "Agent cited §X but the quote didn't match" + real Clause text. Never the model quote.
 - Explanation under an "Agent's Reasoning" label, visually distinct.
 - Minimap: one tick per verified Citation at the Clause's measured position; dashed tick for blocked Citations with a real Clause ID; pinned "not in document" cluster at top for positionless Findings (click focuses the queue); grey ticks for Unmapped Clauses; decided ticks dim.

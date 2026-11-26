@@ -356,6 +356,8 @@ export const EXPORT_FILES = {
 export const EXPORT_TEXT = {
   /** Separates an inserted Clause from its neighbour in the Revised Document. */
   PARAGRAPH_BREAK: "\n\n",
+  /** Tooltip prefix on accepted text shown in the viewer. */
+  TRACKED_CHANGE: "Accepted redline",
   DOWNLOAD_REVISED: "Download revised NDA",
   DOWNLOAD_SUMMARY: "Download review summary",
   /** Shown beside the buttons while some Findings are undecided. */

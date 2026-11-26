@@ -3,9 +3,10 @@
 import { Fragment, useEffect, useMemo, useRef, type KeyboardEvent, type ReactNode } from "react";
 import Box from "@mui/material/Box";
 import { alpha, useTheme } from "@mui/material/styles";
-import { CITATION_HIGHLIGHT_ALPHA, FOCUSED_CITATION_HIGHLIGHT_ALPHA, type RuleId } from "@/common/constants";
+import { CITATION_HIGHLIGHT_ALPHA, EXPORT_TEXT, FOCUSED_CITATION_HIGHLIGHT_ALPHA, type RuleId } from "@/common/constants";
 import type { Clause, ClauseId } from "@/features/document/types";
 import { recommendedAction } from "@/features/review/derive";
+import type { Splice } from "@/features/review/export";
 import type { Finding } from "@/features/review/finding";
 import { ruleTitle } from "@/features/viewer/card";
 import {
@@ -13,7 +14,9 @@ import {
   citationKey,
   clauseDomId,
   displayHighlight,
+  leadingInsertions,
   nextFocusRuleId,
+  type Insertion,
   scrollTarget,
   type TextRun,
 } from "@/features/viewer/segments";
@@ -28,7 +31,11 @@ export interface DocumentViewerProps {
   onFocusFinding?: (ruleId: RuleId) => void;
   /** A Clause to scroll to and outline (e.g. an Unmapped Clause picked in the coverage bar). */
   revealedClause?: ClauseReveal | null;
+  /** Accepted Redlines (`planRevision`), shown as tracked changes over the original text. */
+  splices?: readonly Splice[];
 }
+
+const NO_SPLICES: readonly Splice[] = [];
 
 export interface ClauseReveal {
   readonly clauseId: ClauseId;
@@ -48,10 +55,12 @@ export function DocumentViewer({
   focusedRuleId = null,
   onFocusFinding,
   revealedClause = null,
+  splices = NO_SPLICES,
 }: DocumentViewerProps) {
   const theme = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
-  const blocks = useMemo(() => buildViewerBlocks(text, clauses, findings), [text, clauses, findings]);
+  const blocks = useMemo(() => buildViewerBlocks(text, clauses, findings, splices), [text, clauses, findings, splices]);
+  const leading = useMemo(() => leadingInsertions(splices), [splices]);
 
   const focusedFinding = focusedRuleId ? findings.find((f) => f.ruleId === focusedRuleId) : undefined;
   const target = focusedFinding ? scrollTarget(focusedFinding, clauses) : null;
@@ -90,10 +99,42 @@ export function DocumentViewer({
     if (ruleId && onFocusFinding) onFocusFinding(ruleId);
   };
 
-  const renderRun = (run: TextRun): ReactNode => {
+  const removed = theme.palette.review.action.ESCALATE;
+  const added = theme.palette.review.action.NONE;
+  const struck = { textDecoration: "line-through", textDecorationColor: removed, color: "text.secondary" } as const;
+
+  const renderInsertions = (insertions: readonly Insertion[]): ReactNode =>
+    insertions.map((insertion) => (
+      <Box
+        component="ins"
+        key={insertion.ruleId}
+        title={`${EXPORT_TEXT.TRACKED_CHANGE}: ${ruleTitle(insertion.ruleId)}`}
+        data-inserted-by={insertion.ruleId}
+        sx={{ bgcolor: alpha(added, CITATION_HIGHLIGHT_ALPHA), textDecorationColor: added }}
+      >
+        {insertion.text}
+      </Box>
+    ));
+
+  const renderRun = (run: TextRun): ReactNode => (
+    <Fragment key={run.start}>
+      {renderRunText(run)}
+      {renderInsertions(run.insertsAfter)}
+    </Fragment>
+  );
+
+  const renderRunText = (run: TextRun): ReactNode => {
     const slice = text.slice(run.start, run.end);
     const shown = displayHighlight(run, focusedRuleId);
-    if (!shown) return <Fragment key={run.start}>{slice}</Fragment>;
+    if (!shown) {
+      return run.struckBy ? (
+        <Box component="del" data-struck-by={run.struckBy} sx={struck}>
+          {slice}
+        </Box>
+      ) : (
+        slice
+      );
+    }
 
     const color = theme.palette.review.action[shown.action];
     const focused = shown.ruleId === focusedRuleId;
@@ -105,13 +146,13 @@ export function DocumentViewer({
     };
     return (
       <Box
-        key={run.start}
         component="mark"
         role="button"
         tabIndex={0}
         title={ruleIds.map(ruleTitle).join(", ")}
         aria-label={`Citation for ${ruleIds.map(ruleTitle).join(", ")}`}
         data-rule-ids={ruleIds.join(" ")}
+        data-struck-by={run.struckBy ?? undefined}
         data-citation-anchors={run.anchors.map((h) => citationKey(h.ruleId, h.citationIndex)).join(" ") || undefined}
         onClick={() => focus(run)}
         onKeyDown={onKeyDown}
@@ -123,6 +164,7 @@ export function DocumentViewer({
           boxShadow: `inset 0 -2px 0 ${alpha(color, focused ? 1 : FOCUSED_CITATION_HIGHLIGHT_ALPHA)}`,
           // Overlapping Citations from several Findings get a dotted top edge.
           ...(ruleIds.length > 1 && { borderTop: `2px dotted ${color}` }),
+          ...(run.struckBy && struck),
           "&:hover, &:focus-visible": {
             backgroundColor: alpha(color, FOCUSED_CITATION_HIGHLIGHT_ALPHA),
             outline: "none",
@@ -141,6 +183,7 @@ export function DocumentViewer({
       aria-label="Document"
       sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word", typography: "body1", lineHeight: 1.75 }}
     >
+      {renderInsertions(leading)}
       {blocks.map((block) => {
         if (!block.clause) return <Fragment key={block.start}>{block.runs.map(renderRun)}</Fragment>;
         const outline = clauseOutline(block.clause.id);

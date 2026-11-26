@@ -46,7 +46,7 @@ Business logic lives outside React so the eval CLI and tests can reuse it.
 
 ## Reviewing
 
-Work through the queue with the keyboard: **K** next, **J** previous, **A** approve, **E** edit the redline, **X** escalate (reason required), **D** dismiss. When the review finishes, export from the queue panel:
+Work through the queue with the keyboard: **K** next, **J** previous, **A** approve, **E** edit the redline, **X** escalate (reason required), **D** dismiss. Approved and edited redlines show in the document straight away as tracked changes (original struck through, new text underlined). When the review finishes, export from the queue panel:
 
 - **Download revised NDA**: the document as plain text, with every approved or edited redline applied. Escalated, dismissed and undecided findings change nothing.
 - **Download review summary**: Markdown listing escalations with their reasons, then every finding's status, decision and whether its redline was applied.
