@@ -333,6 +333,16 @@ export const QUEUE_UI_TEXT = {
   ALL_DECIDED: "All findings decided",
 } as const;
 
+/** Copy for the Rule status panel and coverage bar. */
+export const OVERVIEW_UI_TEXT = {
+  RULES_HEADING: "Rules",
+  RULE_PENDING: "Checking…",
+  COVERAGE_HEADING: "Coverage",
+  COVERAGE_PENDING: "Mapping clauses…",
+  COVERAGE_UNAVAILABLE: "Coverage unavailable: clause mapping failed.",
+  UNMAPPED_HEADING: "Unmapped clauses (not checked against any rule)",
+} as const;
+
 /* ------------------------------------------------------------------------ */
 /* Citation verification                                                     */
 /* ------------------------------------------------------------------------ */

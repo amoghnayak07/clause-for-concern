@@ -4,26 +4,59 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { KEYBOARD_SHORTCUTS, QUEUE_UI_TEXT, SHORTCUT_HINTS } from "@/common/constants";
-import type { Clause } from "@/features/document/types";
+import { useMemo, useState } from "react";
+import {
+  KEYBOARD_SHORTCUTS,
+  QUEUE_UI_TEXT,
+  REVIEW_PHASE,
+  SHORTCUT_HINTS,
+  type ReviewPhase,
+  type RuleId,
+} from "@/common/constants";
+import type { Clause, ClauseId } from "@/features/document/types";
+import type { Coverage } from "@/features/review/coverage";
 import type { Finding } from "@/features/review/finding";
-import { DocumentViewer } from "./DocumentViewer";
+import { coverageView, ruleStatusRows } from "@/features/review/overview";
+import { DocumentViewer, type ClauseReveal } from "./DocumentViewer";
 import { FindingList } from "./FindingList";
+import { ReviewOverview } from "./ReviewOverview";
 import { useReviewQueue } from "./useReviewQueue";
 
 export interface ReviewWorkspaceProps {
   text: string;
   clauses: readonly Clause[];
   findings: readonly Finding[];
+  /** Null until the stream's `coverage` event. */
+  coverage?: Coverage | null;
+  phase?: ReviewPhase;
 }
 
 /**
- * Two-pane review: the Document on the left, the Review Queue on the right.
- * Purely prop-driven so a streaming source can feed it Findings as they arrive.
+ * Two-pane review: the Document on the left; the Rule status panel, coverage
+ * bar and Review Queue on the right. Purely prop-driven so a streaming source
+ * can feed it Findings as they arrive.
  */
-export function ReviewWorkspace({ text, clauses, findings }: ReviewWorkspaceProps) {
+export function ReviewWorkspace({
+  text,
+  clauses,
+  findings,
+  coverage = null,
+  phase = REVIEW_PHASE.DONE,
+}: ReviewWorkspaceProps) {
   const { ordered, state, focus, setDraft, cancel, submit } = useReviewQueue(findings, clauses);
   const decided = ordered.filter((finding) => state.decisions[finding.ruleId]).length;
+  const rows = useMemo(() => ruleStatusRows(findings, state.decisions), [findings, state.decisions]);
+  const coverageBar = useMemo(() => coverageView(coverage, clauses, phase), [coverage, clauses, phase]);
+
+  // A revealed Clause stays outlined until focus moves to another Finding.
+  const [reveal, setReveal] = useState<(ClauseReveal & { focusedRuleId: RuleId | null }) | null>(null);
+  const revealedClause = reveal && reveal.focusedRuleId === state.focusedRuleId ? reveal : null;
+  const revealClause = (clauseId: ClauseId) =>
+    setReveal((previous) => ({
+      clauseId,
+      requestId: (previous?.requestId ?? 0) + 1,
+      focusedRuleId: state.focusedRuleId,
+    }));
 
   return (
     <Box
@@ -43,9 +76,17 @@ export function ReviewWorkspace({ text, clauses, findings }: ReviewWorkspaceProp
           findings={findings}
           focusedRuleId={state.focusedRuleId}
           onFocusFinding={focus}
+          revealedClause={revealedClause}
         />
       </Paper>
       <Box component="aside" sx={{ overflowY: "auto", minHeight: 0, pr: 0.5 }}>
+        <ReviewOverview
+          rows={rows}
+          coverage={coverageBar}
+          focusedRuleId={state.focusedRuleId}
+          onFocusFinding={focus}
+          onRevealClause={revealClause}
+        />
         <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", mb: 0.5 }}>
           <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
             {QUEUE_UI_TEXT.HEADING}
